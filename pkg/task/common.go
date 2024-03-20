@@ -237,7 +237,7 @@ func (o *Options) CheckMachine() error {
         name, type_, host, port, username, password, valid := row[0], row[1], row[2], row[3], row[4], row[5], "×"
         if password == "" {
             for i := 1; i < 4; i++ {
-                fmt.Printf("[第%v次输入]请输入主机为[%s]，用户名[%s]的密码：", i, host, username)
+                fmt.Printf("[第%v次输入]请输入主机为%s([%s])，用户名[%s]的密码：", i, name, host, username)
                 if _, err = fmt.Scan(&password); err != nil {
                     fmt.Println("输入有误!")
                 } else {
