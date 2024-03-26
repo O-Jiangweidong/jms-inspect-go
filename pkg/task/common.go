@@ -92,7 +92,8 @@ func (o *Options) GetMySQLClient() (*sql.DB, error) {
     if host == "mysql" {
         cmd := exec.Command("docker", "inspect", "-f", "'{{.NetworkSettings.Networks.jms_net.IPAddress}}'", "jms_mysql")
         if ret, err := cmd.CombinedOutput(); err == nil {
-            host = string(ret)
+            host = strings.Replace(string(ret), "'", "", -1)
+            host = strings.TrimSpace(string(ret))
         }
     }
     port := o.JMSConfig["DB_PORT"]
@@ -105,13 +106,12 @@ func (o *Options) GetMySQLClient() (*sql.DB, error) {
 
 func (o *Options) CheckMySQL() error {
     db, err := o.GetMySQLClient()
-    o.MySQLClient = db
     if err != nil {
         return err
     }
-
+    o.MySQLClient = db
     if err = db.Ping(); err != nil {
-        return fmt.Errorf("连接 MySQL 失败: %v", err)
+        return fmt.Errorf("连接 JumpServer MySQL 失败: %v", err)
     }
     return nil
 }
@@ -183,13 +183,13 @@ func (o *Options) CheckRedis() error {
         _ = rdb.Close()
     }(rdb)
     if _, err := rdb.Ping().Result(); err != nil {
-        return fmt.Errorf("连接 Redis 失败: %v", err)
+        return fmt.Errorf("连接 JumpServer Redis 失败: %v", err)
     }
     return nil
 }
 
 func (o *Options) CheckDB() error {
-    o.Logger.Debug("正在检查数据库是否可连接...")
+    o.Logger.Debug("正在根据 JC 配置文件，检查 JumpServer 数据库是否可连接...")
     if err := o.CheckMySQL(); err != nil {
         return err
     }
