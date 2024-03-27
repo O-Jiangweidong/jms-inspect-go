@@ -286,7 +286,7 @@
                     </tr>
                     {{ if .AbnormalResults }}
                     {{ range .AbnormalResults }}
-                    <tr class="{{ if eq .LevelDisplay }}warning{{ end }}">
+                    <tr class="{{ if eq .Level "critical" }}warning{{ end }}">
                         <td>{{ .LevelDisplay}}</td>
                         <td>{{ .NodeName }}</td>
                         <td>{{ .Desc }}</td>
@@ -507,7 +507,7 @@
                         <td>{{ $m.replay_used }}</td>
                     </tr>
                     <tr>
-                        <th>录像目录空闲</th>
+                        <th>录像目录空闲大小</th>
                         <td>{{ $m.replay_unused }}</td>
                     </tr>
                     <tr>

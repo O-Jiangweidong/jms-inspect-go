@@ -10,4 +10,6 @@ const (
     JumpServer = "jumpserver"
     MySQL      = "mysql"
     Redis      = "redis"
+
+    EmptyFlag = "-"
 )

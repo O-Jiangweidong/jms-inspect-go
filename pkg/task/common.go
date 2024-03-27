@@ -4,10 +4,12 @@ import (
     "database/sql"
     "encoding/csv"
     "fmt"
+    "golang.org/x/crypto/ssh/terminal"
     "inspect/pkg/common"
     "os"
     "os/exec"
     "strings"
+    "syscall"
 
     "github.com/go-redis/redis"
     _ "github.com/go-sql-driver/mysql"
@@ -54,6 +56,7 @@ type Options struct {
     Logger *common.Logger
 
     // 命令行参数
+    Debug           bool
     ReportType      string
     JMSConfigPath   string
     MachineInfoPath string
@@ -93,7 +96,7 @@ func (o *Options) GetMySQLClient() (*sql.DB, error) {
         cmd := exec.Command("docker", "inspect", "-f", "'{{.NetworkSettings.Networks.jms_net.IPAddress}}'", "jms_mysql")
         if ret, err := cmd.CombinedOutput(); err == nil {
             host = strings.Replace(string(ret), "'", "", -1)
-            host = strings.TrimSpace(string(ret))
+            host = strings.TrimSpace(host)
         }
     }
     port := o.JMSConfig["DB_PORT"]
@@ -156,7 +159,8 @@ func (o *Options) GetSingleRedis(host, port, password string) *redis.Client {
             "'{{.NetworkSettings.Networks.jms_net.IPAddress}}'", "jms_redis",
         )
         if ret, err := cmd.CombinedOutput(); err == nil {
-            host = string(ret)
+            host = strings.Replace(string(ret), "'", "", -1)
+            host = strings.TrimSpace(host)
         }
     }
     return redis.NewClient(&redis.Options{
@@ -237,10 +241,12 @@ func (o *Options) CheckMachine() error {
         name, type_, host, port, username, password, valid := row[0], row[1], row[2], row[3], row[4], row[5], "×"
         if password == "" {
             for i := 1; i < 4; i++ {
-                fmt.Printf("[第%v次输入]请输入主机为%s([%s])，用户名[%s]的密码：", i, name, host, username)
-                if _, err = fmt.Scan(&password); err != nil {
-                    fmt.Println("输入有误!")
+                o.Logger.Debug("请输入主机为%s([%s])，用户名[%s]的密码：", name, host, username)
+                if bytePassword, err := terminal.ReadPassword(syscall.Stdin); err != nil {
+                    o.Logger.Error("输入有误!")
                 } else {
+                    password = string(bytePassword)
+                    fmt.Println()
                     break
                 }
             }
@@ -254,6 +260,7 @@ func (o *Options) CheckMachine() error {
         } else {
             machineNameSet[name] = true
         }
+        o.Logger.Debug("正在检查机器%s([%s])是否可连接...", machine.Name, machine.Host)
         if machine.Connect() {
             machine.Valid = true
             o.MachineSet = append(o.MachineSet, machine)
@@ -274,7 +281,7 @@ func (o *Options) CheckMachine() error {
 
     if tableErr == nil {
         var answer string
-        fmt.Println(table)
+        fmt.Printf("\n%s\n", table)
         fmt.Print("是否继续执行，本次任务只会执行有效资产(默认为 yes): ")
         _, _ = fmt.Scanln(&answer)
         answerStr := strings.ToLower(string(answer))

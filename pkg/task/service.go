@@ -5,10 +5,11 @@ import (
     "inspect/pkg/common"
     "path/filepath"
     "sort"
+    "strconv"
     "strings"
 )
 
-const ComputeSpaceCommand = "du %s -sh|awk '{print $1}'"
+const ComputeSpaceCommand = "[ -d %s ] && du %s -sh|awk '{print $1}' || echo '%s'"
 
 type Component struct {
     ServiceName   string
@@ -26,23 +27,38 @@ func (t *ServiceTask) GetReplayPathInfo() {
     replayPath := filepath.Join(volumeDir, "core", "data", "media", "replay")
     t.result["replay_path"] = replayPath
     // 总大小
-    cmd := "df -h . --output=size| awk '{if (NR > 1) {print $1}}'"
-    if result, err := t.Machine.DoCommand(cmd); err == nil {
+    cmd := fmt.Sprintf(
+        "[ -d %s ] && df -h %s --output=size| awk '{if (NR > 1) {print $1}}' || echo '0'",
+        replayPath, replayPath,
+    )
+    if result, err := t.Machine.DoCommand(cmd); err == nil && result != common.EmptyFlag {
         t.result["replay_total"] = result
     } else {
         t.result["replay_total"] = common.Empty
     }
     // 已经使用
-    cmd = fmt.Sprintf(ComputeSpaceCommand, replayPath)
-    if result, err := t.Machine.DoCommand(cmd); err == nil {
+    cmd = fmt.Sprintf(ComputeSpaceCommand, replayPath, replayPath, common.EmptyFlag)
+    if result, err := t.Machine.DoCommand(cmd); err == nil && result != common.EmptyFlag {
         t.result["replay_used"] = result
     } else {
         t.result["replay_used"] = common.Empty
     }
     // 未使用
-    cmd = fmt.Sprintf("cd %s;df -h . --output=avail| awk '{if (NR > 1) {print $1}}'", replayPath)
-    if result, err := t.Machine.DoCommand(cmd); err == nil {
-        t.result["replay_unused"] = result
+    cmd = fmt.Sprintf(
+        "[ -d %s ] && df %s --output=avail| awk '{if (NR > 1) {print $1}}' || echo '%s'",
+        replayPath, replayPath, common.EmptyFlag,
+    )
+    if result, err := t.Machine.DoCommand(cmd); err == nil && result != common.EmptyFlag {
+        if size, err := strconv.ParseInt(result, 10, 64); err != nil {
+            t.result["replay_unused"] = common.Empty
+        } else {
+            sizeDisplay := common.SpaceDisplay(size)
+            t.result["replay_unused"] = sizeDisplay
+            if size <= 50*1024 {
+                desc := fmt.Sprintf("录像空间大小不足，当前大小: %s", sizeDisplay)
+                t.SetAbnormalEvent(desc, common.Critical)
+            }
+        }
     } else {
         t.result["replay_unused"] = common.Empty
     }
@@ -62,7 +78,7 @@ func (t *ServiceTask) GetComponentLogSize() {
         } else {
             logPath = filepath.Join(volumeDir, name, "data", "logs")
         }
-        cmd := fmt.Sprintf(ComputeSpaceCommand, logPath)
+        cmd := fmt.Sprintf(ComputeSpaceCommand, logPath, logPath, common.EmptyFlag)
         if result, err := t.Machine.DoCommand(cmd); err == nil {
             t.result[name+"_log_size"] = result
         } else {
