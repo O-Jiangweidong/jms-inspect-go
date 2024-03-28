@@ -239,14 +239,32 @@ func (o *Options) CheckMachine() error {
 
     var invalidMachines []Machine
     machineNameSet := make(map[string]bool)
+    var nameIdx, typeIdx, hostIdx, portIdx, usernameIdx, passwordIdx int
     for index, row := range rows {
         if index == 0 {
+            for rowIdx, rowValue := range row {
+                switch strings.ToLower(rowValue) {
+                case "name":
+                    nameIdx = rowIdx
+                case "type":
+                    typeIdx = rowIdx
+                case "host":
+                    hostIdx = rowIdx
+                case "port":
+                    portIdx = rowIdx
+                case "username":
+                    usernameIdx = rowIdx
+                case "password":
+                    passwordIdx = rowIdx
+                }
+            }
             continue
         }
         if len(row) != 6 {
             return fmt.Errorf("机器配置填写有误，请检查: [%v]", err)
         }
-        name, type_, host, port, username, password, valid := row[0], row[1], row[2], row[3], row[4], row[5], "×"
+        name, type_, host, port := row[nameIdx], row[typeIdx], row[hostIdx], row[portIdx]
+        username, password, valid := row[usernameIdx], row[passwordIdx], "×"
         if password == "" {
             for i := 1; i < 4; i++ {
                 o.Logger.Debug("请输入主机为%s([%s])，用户名[%s]的密码：", name, host, username)
