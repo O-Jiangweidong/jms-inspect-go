@@ -4,16 +4,17 @@ import (
     "database/sql"
     "encoding/csv"
     "fmt"
-    "golang.org/x/crypto/ssh/terminal"
-    "inspect/pkg/common"
     "os"
     "os/exec"
     "strings"
     "syscall"
 
+    "inspect/pkg/common"
+
     "github.com/go-redis/redis"
     _ "github.com/go-sql-driver/mysql"
     "github.com/liushuochen/gotable"
+    "golang.org/x/crypto/ssh/terminal"
 )
 
 type GlobalInfo struct {
@@ -23,6 +24,7 @@ type GlobalInfo struct {
     RedisCount      int
     TotalCount      int
     InspectDatetime string
+    JMSVersion      string
 }
 
 type ResultSummary struct {
@@ -36,7 +38,13 @@ type ResultSummary struct {
     EchartsData string
 }
 
-func (r *ResultSummary) SetOtherInfo(opts *Options) {
+func (r *ResultSummary) SetGlobalInfo(opts *Options) {
+    if version, exist := opts.JMSConfig["CURRENT_VERSION"]; exist {
+        r.GlobalInfo.JMSVersion = version
+    } else {
+        r.GlobalInfo.JMSVersion = common.Empty
+    }
+
     r.GlobalInfo.InspectDatetime = common.CurrentDatetime(false)
     r.GlobalInfo.Machines = opts.MachineSet
     for _, m := range opts.MachineSet {
@@ -219,7 +227,7 @@ func (o *Options) CheckMachine() error {
         _ = file.Close()
     }(file)
 
-    o.Logger.Debug("正在检查模板文件中机器是否合法...")
+    o.Logger.Debug("正在检查模板文件中机器是否有效...")
     reader := csv.NewReader(file)
     rows, err := reader.ReadAll()
     if err != nil {

@@ -2,7 +2,9 @@ package main
 
 import (
     "flag"
+
     _ "github.com/go-sql-driver/mysql"
+
     "inspect/pkg/common"
     "inspect/pkg/report"
     "inspect/pkg/task"
@@ -40,7 +42,7 @@ func main() {
     var abnormalResult []task.AbnormalMsg
     logger.Info("巡检任务开始")
     // 设置全局信息
-    resultSummary.SetOtherInfo(&opts)
+    resultSummary.SetGlobalInfo(&opts)
     // 执行摘要任务
     summaryTask := task.SummaryTask{Client: opts.MySQLClient}
     logger.Info("开始执行任务[%s]", summaryTask.GetName())
