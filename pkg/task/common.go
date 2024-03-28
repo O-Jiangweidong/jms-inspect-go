@@ -242,7 +242,7 @@ func (o *Options) CheckMachine() error {
         if password == "" {
             for i := 1; i < 4; i++ {
                 o.Logger.Debug("请输入主机为%s([%s])，用户名[%s]的密码：", name, host, username)
-                if bytePassword, err := terminal.ReadPassword(syscall.Stdin); err != nil {
+                if bytePassword, err := terminal.ReadPassword(int(syscall.Stdin)); err != nil {
                     o.Logger.Error("输入有误!")
                 } else {
                     password = string(bytePassword)
