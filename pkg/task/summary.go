@@ -10,7 +10,7 @@ import (
 type SummaryTask struct {
     Task
 
-    Client *sql.DB
+    client *sql.DB
 }
 
 type ChartCoordinate struct {
@@ -25,15 +25,26 @@ type PieItem struct {
     Value string `json:"value"`
 }
 
+func (t *SummaryTask) Init(opts *Options) error {
+    t.Options = opts
+    t.result = make(map[string]interface{})
+    client, err := opts.GetMySQLClient()
+    if err != nil {
+        return err
+    }
+    t.client = client
+    return nil
+}
+
 func (t *SummaryTask) getOne(query string) string {
     count := "0"
-    _ = t.Client.QueryRow(query).Scan(&count)
+    _ = t.client.QueryRow(query).Scan(&count)
     return count
 }
 
 func (t *SummaryTask) getTwo(query string) (string, string) {
     var one, two string
-    _ = t.Client.QueryRow(query).Scan(&one, &two)
+    _ = t.client.QueryRow(query).Scan(&one, &two)
     return one, two
 }
 
@@ -41,7 +52,7 @@ func (t *SummaryTask) getChartCoordinate(query string) *ChartCoordinate {
     var err error
     var data []byte
     coordinate := ChartCoordinate{XList: []string{}, YList: []string{}}
-    rows, err := t.Client.Query(query)
+    rows, err := t.client.Query(query)
     if err != nil {
         return &coordinate
     }
@@ -86,7 +97,7 @@ func (t *SummaryTask) GetJMSSummary() {
     query = "SELECT p.name, COUNT(*) AS asset_count FROM assets_platform p " +
         "JOIN assets_asset a ON p.id = a.platform_id " +
         "GROUP BY p.name ORDER BY asset_count desc LIMIT 3;"
-    rows, err := t.Client.Query(query)
+    rows, err := t.client.Query(query)
     if err == nil {
         defer func(rows *sql.Rows) {
             _ = rows.Close()
@@ -216,7 +227,7 @@ func (t *SummaryTask) GetChartData() {
     query = "SELECT protocol, count(*) AS num FROM terminal_session " +
         "WHERE DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date_start " +
         "GROUP BY protocol ORDER BY num DESC"
-    rows, err := t.Client.Query(query)
+    rows, err := t.client.Query(query)
     if err == nil {
         defer func(rows *sql.Rows) {
             _ = rows.Close()
@@ -241,10 +252,11 @@ func (t *SummaryTask) GetChartData() {
 }
 
 func (t *SummaryTask) GetName() string {
-    return "摘要"
+    return "信息摘要"
 }
 
-func (t *SummaryTask) Run() {
+func (t *SummaryTask) Run() error {
     t.GetJMSSummary()
     t.GetChartData()
+    return nil
 }

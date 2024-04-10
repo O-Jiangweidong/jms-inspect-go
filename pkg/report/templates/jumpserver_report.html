@@ -128,6 +128,9 @@
             text-align: center;
             max-width: 180px;
         }
+        .v-table {
+            margin-top: 10px;
+        }
         .v-table tr th {
             width: 250px;
             max-width: 250px;
@@ -167,79 +170,79 @@
         <small style="position:absolute;bottom:4%;left:40%;">JumpServer 版本: {{ .GlobalInfo.JMSVersion }}</small>
         <small style="position:absolute;bottom:2%;left:40%;">巡检时间: {{ .GlobalInfo.InspectDatetime }}</small>
     </div>
-    <div class="page">
-        <div class="page-header"></div>
-        <div style="text-align: center">
-            <div style="margin-top: 50px">目录</div>
-            <div class="catalog">
-                <ul>
-                    <li>
-                        <div class="catalog-out">
-                            <div class="catalog-title">综述</div>
-                        </div>
-                        <ul>
-                            <li>
-                                <div class="catalog-out">
-                                    <div class="catalog-title">1.1 巡检目标</div>
-                                    <div class="catalog-line">&nbsp;</div>
-                                    <div class="catalog-page-num">1</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="catalog-out">
-                                    <div class="catalog-title">1.2 运行概况</div>
-                                    <div class="catalog-line">&nbsp;</div>
-                                    <div class="catalog-page-num">1</div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="catalog-out">
-                                    <div class="catalog-title">1.3 运营概况</div>
-                                    <div class="catalog-line">&nbsp;</div>
-                                    <div class="catalog-page-num">1</div>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <div class="catalog-out">
-                            <div class="catalog-title">巡检详情</div>
-                        </div>
-                        <ul>
-                            <li>
-                                <div class="catalog-out">
-                                    <div class="catalog-title">2.1 系统巡检</div>
-                                    <div class="catalog-line">&nbsp;</div>
-                                    <div class="catalog-page-num">2</div>
-                                </div>
-                                <ul>
-                                    {{ range $i, $m := .NormalResults }}
-                                    <li>
-                                        <div class="catalog-out">
-                                            <div class="catalog-title">2.1.{{ Add $i 1 }} {{ $m.machine_name }}</div>
-                                            <div class="catalog-line">&nbsp;</div>
-                                            <div class="catalog-page-num">{{ CalcPage $i }}</div>
-                                        </div>
-                                    </li>
-                                    {{ end }}
-                                </ul>
-                            </li>
-                            <li>
-                                <div class="catalog-out">
-                                    <div class="catalog-title">2.2 运营巡检</div>
-                                    <div class="catalog-line">&nbsp;</div>
-                                    <div class="catalog-page-num">12</div>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="page-footer">
-            <div class="page-footer-company"></div>
-        </div>
-    </div>
+<!--    <div class="page">-->
+<!--        <div class="page-header"></div>-->
+<!--        <div style="text-align: center">-->
+<!--            <div style="margin-top: 50px">目录</div>-->
+<!--            <div class="catalog">-->
+<!--                <ul>-->
+<!--                    <li>-->
+<!--                        <div class="catalog-out">-->
+<!--                            <div class="catalog-title">综述</div>-->
+<!--                        </div>-->
+<!--                        <ul>-->
+<!--                            <li>-->
+<!--                                <div class="catalog-out">-->
+<!--                                    <div class="catalog-title">1.1 巡检目标</div>-->
+<!--                                    <div class="catalog-line">&nbsp;</div>-->
+<!--                                    <div class="catalog-page-num">1</div>-->
+<!--                                </div>-->
+<!--                            </li>-->
+<!--                            <li>-->
+<!--                                <div class="catalog-out">-->
+<!--                                    <div class="catalog-title">1.2 运行概况</div>-->
+<!--                                    <div class="catalog-line">&nbsp;</div>-->
+<!--                                    <div class="catalog-page-num">1</div>-->
+<!--                                </div>-->
+<!--                            </li>-->
+<!--                            <li>-->
+<!--                                <div class="catalog-out">-->
+<!--                                    <div class="catalog-title">1.3 运营概况</div>-->
+<!--                                    <div class="catalog-line">&nbsp;</div>-->
+<!--                                    <div class="catalog-page-num">1</div>-->
+<!--                                </div>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <div class="catalog-out">-->
+<!--                            <div class="catalog-title">巡检详情</div>-->
+<!--                        </div>-->
+<!--                        <ul>-->
+<!--                            <li>-->
+<!--                                <div class="catalog-out">-->
+<!--                                    <div class="catalog-title">2.1 系统巡检</div>-->
+<!--                                    <div class="catalog-line">&nbsp;</div>-->
+<!--                                    <div class="catalog-page-num">2</div>-->
+<!--                                </div>-->
+<!--                                <ul>-->
+<!--                                    {{ range $i, $m := .NormalResults }}-->
+<!--                                    <li>-->
+<!--                                        <div class="catalog-out">-->
+<!--                                            <div class="catalog-title">2.1.{{ Add $i 1 }} {{ $m.machine_name }}</div>-->
+<!--                                            <div class="catalog-line">&nbsp;</div>-->
+<!--                                            <div class="catalog-page-num">{{ CalcPage $i }}</div>-->
+<!--                                        </div>-->
+<!--                                    </li>-->
+<!--                                    {{ end }}-->
+<!--                                </ul>-->
+<!--                            </li>-->
+<!--                            <li>-->
+<!--                                <div class="catalog-out">-->
+<!--                                    <div class="catalog-title">2.2 运营巡检</div>-->
+<!--                                    <div class="catalog-line">&nbsp;</div>-->
+<!--                                    <div class="catalog-page-num">12</div>-->
+<!--                                </div>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="page-footer">-->
+<!--            <div class="page-footer-company"></div>-->
+<!--        </div>-->
+<!--    </div>-->
     <div class="page">
         <div class="page-header"></div>
         <div style="text-align: center">
@@ -359,12 +362,231 @@
         </div>
     </div>
 
+    <!--  MySQL 页签  -->
+    {{ if .DBResult.HasMySQLInfo }}
+    <div class="page">
+        <div class="page-header"></div>
+        <div style="text-align: center">
+            <div style="text-align: left; margin: 0 5%">
+                <h3>2.1 MySQL 状态如下表：</h3>
+                <table class="v-table">
+                    <tr>
+                        <th>数据库运行时长</th>
+                        <td>{{ .DBResult.db_operating_time }}</td>
+                    </tr>
+                    <tr>
+                        <th>SQL MODE</th>
+                        <td>{{ .DBResult.db_sql_mode }}</td>
+                    </tr>
+                    <tr>
+                        <th>最大连接数</th>
+                        <td>{{ .DBResult.db_max_connect }}</td>
+                    </tr>
+                    <tr>
+                        <th>当前连接数</th>
+                        <td>{{ .DBResult.db_current_connect }}</td>
+                    </tr>
+                    <tr>
+                        <th>QPS</th>
+                        <td>{{ .DBResult.db_qps }}</td>
+                    </tr>
+                    <tr>
+                        <th>TPS</th>
+                        <td>{{ .DBResult.db_tps }}</td>
+                    </tr>
+                    <tr>
+                        <th>慢查询数</th>
+                        <td>{{ .DBResult.db_slow_query }}</td>
+                    </tr>
+                    <tr>
+                        <th>当前事务数</th>
+                        <td>{{ .DBResult.db_current_transaction }}</td>
+                    </tr>
+                    <tr>
+                        <th>字符集</th>
+                        <td>{{ .DBResult.db_charset }}</td>
+                    </tr>
+                    <tr>
+                        <th>排序规则</th>
+                        <td>{{ .DBResult.db_sort_rule }}</td>
+                    </tr>
+                    <tr>
+                        <th>Slave IO Running</th>
+                        <td>{{ .DBResult.db_slave_io_running }}</td>
+                    </tr>
+                    <tr>
+                        <th>Slave SQL Running</th>
+                        <td>{{ .DBResult.db_slave_sql_running }}</td>
+                    </tr>
+                    <tr>
+                        <th>总表数</th>
+                        <td>{{ .DBResult.db_table_count }}</td>
+                    </tr>
+                </table>
+
+                <h3>2.2 数据库表大小前10位：</h3>
+                <table>
+                    <tr>
+                        <th>表名</th>
+                        <th>记录数</th>
+                        <th>表大小(M)</th>
+                    </tr>
+                    {{ range .DBResult.top_10_table }}
+                    <tr>
+                        <td>{{ .TableName }}</td>
+                        <td>{{ .TableRecord }}</td>
+                        <td>{{ .TableSize }}</td>
+                    </tr>
+                    {{ end }}
+                </table>
+            </div>
+        </div>
+        <div class="page-footer">
+            <div>第 {{ GetPage }} 页</div>
+            <div class="page-footer-company"></div>
+        </div>
+    </div>
+    {{ end }}
+    <!--  Redis 页签  -->
+    {{ if .DBResult.HasRedisInfo }}
+    <div class="page">
+        <div class="page-header"></div>
+        <div style="text-align: center">
+            <div style="text-align: left; margin: 0 5%">
+                <h3>2.3 Redis 状态如下表：</h3>
+                <table class="v-table">
+                    <tr>
+                        <th colspan="2">服务端</th>
+                    </tr>
+                    <tr>
+                        <th>Redis版本</th>
+                        <td>{{ .DBResult.redis_version }}</td>
+                    </tr>
+                    <tr>
+                        <th>Redis模型</th>
+                        <td>{{ .DBResult.redis_mode }}</td>
+                    </tr>
+                    <tr>
+                        <th>TCP Port</th>
+                        <td>{{ .DBResult.redis_port }}</td>
+                    </tr>
+                    <tr>
+                        <th>运行时间(天)</th>
+                        <td>{{ .DBResult.redis_uptime }}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">客户端</th>
+                    </tr>
+                    <tr>
+                        <th>当前连接数</th>
+                        <td>{{ .DBResult.redis_connect }}</td>
+                    </tr>
+                    <tr>
+                        <th>集群连接数</th>
+                        <td>{{ .DBResult.redis_cluster_connect }}</td>
+                    </tr>
+                    <tr>
+                        <th>最大连接数</th>
+                        <td>{{ .DBResult.redis_max_connect }}</td>
+                    </tr>
+                    <tr>
+                        <th>当前阻塞连接</th>
+                        <td>{{ .DBResult.redis_blocked_connect }}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">内存</th>
+                    </tr>
+                    <tr>
+                        <th>已使用内存</th>
+                        <td>{{ .DBResult.used_memory_human }}</td>
+                    </tr>
+                    <tr>
+                        <th>物理内存占用量</th>
+                        <td>{{ .DBResult.used_memory_rss_human }}</td>
+                    </tr>
+                    <tr>
+                        <th>内存使用最大值</th>
+                        <td>{{ .DBResult.used_memory_peak_human }}</td>
+                    </tr>
+                    <tr>
+                        <th>Lua使用内存量</th>
+                        <td>{{ .DBResult.used_memory_lua_human }}</td>
+                    </tr>
+                    <tr>
+                        <th>最大可用内存</th>
+                        <td>{{ .DBResult.maxmemory_human }}</td>
+                    </tr>
+                    <tr>
+                        <th>淘汰策略</th>
+                        <td>{{ .DBResult.maxmemory_policy }}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">统计</th>
+                    </tr>
+                    <tr>
+                        <th>共接受的连接数</th>
+                        <td>{{ .DBResult.total_connections_received }}</td>
+                    </tr>
+                    <tr>
+                        <th>共处理的命令数</th>
+                        <td>{{ .DBResult.total_commands_processed }}</td>
+                    </tr>
+                    <tr>
+                        <th>每秒执行的命令数</th>
+                        <td>{{ .DBResult.instantaneous_ops_per_sec }}</td>
+                    </tr>
+                    <tr>
+                        <th>入口流量(字节)</th>
+                        <td>{{ .DBResult.total_net_input_bytes }}</td>
+                    </tr>
+                    <tr>
+                        <th>出口流量(字节)</th>
+                        <td>{{ .DBResult.total_net_output_bytes }}</td>
+                    </tr>
+                    <tr>
+                        <th>被拒绝连接数</th>
+                        <td>{{ .DBResult.rejected_connections }}</td>
+                    </tr>
+                    <tr>
+                        <th>过期键个数</th>
+                        <td>{{ .DBResult.expired_keys }}</td>
+                    </tr>
+                    <tr>
+                        <th>执行淘汰策略键个数</th>
+                        <td>{{ .DBResult.evicted_keys }}</td>
+                    </tr>
+                    <tr>
+                        <th>键命中次数</th>
+                        <td>{{ .DBResult.keyspace_hits }}</td>
+                    </tr>
+                    <tr>
+                        <th>键未命中次数</th>
+                        <td>{{ .DBResult.keyspace_misses }}</td>
+                    </tr>
+                    <tr>
+                        <th>发布订阅频道数</th>
+                        <td>{{ .DBResult.pubsub_channels }}</td>
+                    </tr>
+                    <tr>
+                        <th>发布订阅匹配模式频道数</th>
+                        <td>{{ .DBResult.pubsub_patterns }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="page-footer">
+            <div>第 {{ GetPage }} 页</div>
+            <div class="page-footer-company"></div>
+        </div>
+    </div>
+    {{ end }}
+
     {{ range $i, $m := .NormalResults }}
     <div class="page">
         <div class="page-header"></div>
         <div style="text-align: center">
             <div style="text-align: left; margin: 0 5%">
-                <h4>2.1.{{ Add $i 1 }} {{ $m.machine_name }}</h4>
+                <h3>3.1.{{ Add $i 1 }} {{ $m.machine_name }}</h3>
                 <table class="v-table">
                     <caption>系统信息如下表：</caption>
                     <tr>
@@ -588,234 +810,13 @@
             <div class="page-footer-company"></div>
         </div>
     </div>
-
-    <!--  MySQL 页签  -->
-    {{ if eq $m.machine_type "mysql" }}
-    <div class="page">
-        <div class="page-header"></div>
-        <div style="text-align: center">
-            <div style="text-align: left; margin: 0 5%">
-                <br>
-                <table class="v-table">
-                    <caption>数据库状态如下表：</caption>
-                    <tr>
-                        <th>数据库运行时长</th>
-                        <td>{{ $m.db_operating_time }}</td>
-                    </tr>
-                    <tr>
-                        <th>SQL MODE</th>
-                        <td>{{ $m.db_sql_mode }}</td>
-                    </tr>
-                    <tr>
-                        <th>最大连接数</th>
-                        <td>{{ $m.db_max_connect }}</td>
-                    </tr>
-                    <tr>
-                        <th>当前连接数</th>
-                        <td>{{ $m.db_current_connect }}</td>
-                    </tr>
-                    <tr>
-                        <th>QPS</th>
-                        <td>{{ $m.db_qps }}</td>
-                    </tr>
-                    <tr>
-                        <th>TPS</th>
-                        <td>{{ $m.db_tps }}</td>
-                    </tr>
-                    <tr>
-                        <th>慢查询数</th>
-                        <td>{{ $m.db_slow_query }}</td>
-                    </tr>
-                    <tr>
-                        <th>当前事务数</th>
-                        <td>{{ $m.db_current_transaction }}</td>
-                    </tr>
-                    <tr>
-                        <th>字符集</th>
-                        <td>{{ $m.db_charset }}</td>
-                    </tr>
-                    <tr>
-                        <th>排序规则</th>
-                        <td>{{ $m.db_sort_rule }}</td>
-                    </tr>
-                    <tr>
-                        <th>Slave IO Running</th>
-                        <td>{{ $m.db_slave_io_running }}</td>
-                    </tr>
-                    <tr>
-                        <th>Slave SQL Running</th>
-                        <td>{{ $m.db_slave_sql_running }}</td>
-                    </tr>
-                    <tr>
-                        <th>总表数</th>
-                        <td>{{ $m.db_table_count }}</td>
-                    </tr>
-                </table>
-                <br>
-                <table>
-                    <caption>数据量前Top10：</caption>
-                    <tr>
-                        <th>表名</th>
-                        <th>记录数</th>
-                        <th>表大小(M)</th>
-                    </tr>
-                    {{ range $m.top_10_table }}
-                    <tr>
-                        <td>{{ .TableName }}</td>
-                        <td>{{ .TableRecord }}</td>
-                        <td>{{ .TableSize }}</td>
-                    </tr>
-                    {{ end }}
-                </table>
-            </div>
-        </div>
-        <div class="page-footer">
-            <div>第 {{ GetPage }} 页</div>
-            <div class="page-footer-company"></div>
-        </div>
-    </div>
-    {{ end }}
-    <!--  Redis 页签  -->
-    {{ if eq $m.machine_type "redis" }}
-    <div class="page">
-        <div class="page-header"></div>
-        <div style="text-align: center">
-            <div style="text-align: left; margin: 0 5%">
-                <br>
-                <table class="v-table">
-                    <caption>Redis状态如下表：</caption>
-                    <tr>
-                        <th colspan="2">服务端</th>
-                    </tr>
-                    <tr>
-                        <th>Redis版本</th>
-                        <td>{{ $m.redis_version }}</td>
-                    </tr>
-                    <tr>
-                        <th>Redis模型</th>
-                        <td>{{ $m.redis_mode }}</td>
-                    </tr>
-                    <tr>
-                        <th>TCP Port</th>
-                        <td>{{ $m.redis_port }}</td>
-                    </tr>
-                    <tr>
-                        <th>运行时间(天)</th>
-                        <td>{{ $m.redis_uptime }}</td>
-                    </tr>
-                    <tr>
-                        <th colspan="2">客户端</th>
-                    </tr>
-                    <tr>
-                        <th>当前连接数</th>
-                        <td>{{ $m.redis_connect }}</td>
-                    </tr>
-                    <tr>
-                        <th>集群连接数</th>
-                        <td>{{ $m.redis_cluster_connect }}</td>
-                    </tr>
-                    <tr>
-                        <th>最大连接数</th>
-                        <td>{{ $m.redis_max_connect }}</td>
-                    </tr>
-                    <tr>
-                        <th>当前阻塞连接</th>
-                        <td>{{ $m.redis_blocked_connect }}</td>
-                    </tr>
-                    <tr>
-                        <th colspan="2">内存</th>
-                    </tr>
-                    <tr>
-                        <th>已使用内存</th>
-                        <td>{{ $m.used_memory_human }}</td>
-                    </tr>
-                    <tr>
-                        <th>物理内存占用量</th>
-                        <td>{{ $m.used_memory_rss_human }}</td>
-                    </tr>
-                    <tr>
-                        <th>内存使用最大值</th>
-                        <td>{{ $m.used_memory_peak_human }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lua使用内存量</th>
-                        <td>{{ $m.used_memory_lua_human }}</td>
-                    </tr>
-                    <tr>
-                        <th>最大可用内存</th>
-                        <td>{{ $m.maxmemory_human }}</td>
-                    </tr>
-                    <tr>
-                        <th>淘汰策略</th>
-                        <td>{{ $m.maxmemory_policy }}</td>
-                    </tr>
-                    <tr>
-                        <th colspan="2">统计</th>
-                    </tr>
-                    <tr>
-                        <th>共接受的连接数</th>
-                        <td>{{ $m.total_connections_received }}</td>
-                    </tr>
-                    <tr>
-                        <th>共处理的命令数</th>
-                        <td>{{ $m.total_commands_processed }}</td>
-                    </tr>
-                    <tr>
-                        <th>每秒执行的命令数</th>
-                        <td>{{ $m.instantaneous_ops_per_sec }}</td>
-                    </tr>
-                    <tr>
-                        <th>入口流量(字节)</th>
-                        <td>{{ $m.total_net_input_bytes }}</td>
-                    </tr>
-                    <tr>
-                        <th>出口流量(字节)</th>
-                        <td>{{ $m.total_net_output_bytes }}</td>
-                    </tr>
-                    <tr>
-                        <th>被拒绝连接数</th>
-                        <td>{{ $m.rejected_connections }}</td>
-                    </tr>
-                    <tr>
-                        <th>过期键个数</th>
-                        <td>{{ $m.expired_keys }}</td>
-                    </tr>
-                    <tr>
-                        <th>执行淘汰策略键个数</th>
-                        <td>{{ $m.evicted_keys }}</td>
-                    </tr>
-                    <tr>
-                        <th>键命中次数</th>
-                        <td>{{ $m.keyspace_hits }}</td>
-                    </tr>
-                    <tr>
-                        <th>键未命中次数</th>
-                        <td>{{ $m.keyspace_misses }}</td>
-                    </tr>
-                    <tr>
-                        <th>发布订阅频道数</th>
-                        <td>{{ $m.pubsub_channels }}</td>
-                    </tr>
-                    <tr>
-                        <th>发布订阅匹配模式频道数</th>
-                        <td>{{ $m.pubsub_patterns }}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <div class="page-footer">
-            <div>第 {{ GetPage }} 页</div>
-            <div class="page-footer-company"></div>
-        </div>
-    </div>
-    {{ end }}
     {{ end }}
     {{ if .VirtualResult }}
     <div class="page">
         <div class="page-header"></div>
         <div style="text-align: center">
             <div style="text-align: left; margin: 0 5%">
-                <h3>2.1 运营巡检</h3>
+                <h3>4.1 运营巡检</h3>
                 <small>
                     当前共有 <strong>{{ .VirtualResult.organization_count }}</strong> 个组织，<strong>{{ .VirtualResult.user_count }}</strong> 个用户，<strong>{{ .VirtualResult.asset_count }}</strong> 个资产(前三: {{ .VirtualResult.asset_count_display }})，<strong>{{ .VirtualResult.online_session }}</strong> 个在线会话。最大单日登录次数 <strong>{{ .VirtualResult.max_login_count }}</strong> 次，最大单日访问资产数 <strong>{{ .VirtualResult.max_connect_asset_count }}</strong> 次, 详细指标数据参见下表。
                 </small>

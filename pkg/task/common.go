@@ -33,6 +33,7 @@ type ResultSummary struct {
     NormalResults   []map[string]interface{}
     AbnormalResults []AbnormalMsg
     VirtualResult   map[string]interface{}
+    DBResult        map[string]interface{}
 
     // Other
     EchartsData string
@@ -302,7 +303,7 @@ func (o *Options) CheckMachine() error {
     }
 
     if len(o.MachineSet) == 0 {
-        return fmt.Errorf("没有获取到机器信息，请检查此文件内容: %s", o.MachineInfoPath)
+        return fmt.Errorf("没有获取到有效的机器信息，请检查此文件内容: %s", o.MachineInfoPath)
     }
 
     if tableErr == nil {

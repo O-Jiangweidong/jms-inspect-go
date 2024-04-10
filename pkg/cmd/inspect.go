@@ -44,15 +44,14 @@ func main() {
     // 设置全局信息
     resultSummary.SetGlobalInfo(&opts)
     // 执行摘要任务
-    summaryTask := task.SummaryTask{Client: opts.MySQLClient}
-    logger.Info("开始执行任务[%s]", summaryTask.GetName())
-    if err := summaryTask.Init(&opts); err != nil {
-        logger.Error("初始化任务失败: %s", err)
-    }
-    summaryTask.Run()
-    result, _ = summaryTask.GetResult()
+    summaryTask := task.SummaryTask{}
+    result, _ = task.DoTask(&summaryTask, &opts)
     resultSummary.VirtualResult = result
-    logger.Info("执行结束[%s]\n", summaryTask.GetName())
+
+    // 执行组件依赖任务
+    dbTask := task.DBTask{}
+    result, _ = task.DoTask(&dbTask, &opts)
+    resultSummary.DBResult = result
 
     var resultList []map[string]interface{}
     for _, m := range opts.MachineSet {

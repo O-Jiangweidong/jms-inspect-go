@@ -2,7 +2,6 @@ package task
 
 import (
     "fmt"
-    "strconv"
     "strings"
     "time"
 
@@ -68,10 +67,6 @@ func (m *Machine) GetTasks() []AbstractTask {
     switch m.Type {
     case common.JumpServer:
         generalTasks = append(generalTasks, &ServiceTask{Machine: m})
-    case common.Redis:
-        generalTasks = append(generalTasks, &RedisTask{})
-    case common.MySQL:
-        generalTasks = append(generalTasks, &MySQLTask{})
     }
     return generalTasks
 }
@@ -110,22 +105,9 @@ type Executor struct {
 
 func (e *Executor) Execute(opts *Options) (map[string]interface{}, []AbnormalMsg) {
     e.Logger.Info("开始执行机器名为[%s]的任务，共%v个", e.Machine.Name, len(e.Tasks))
-    var err error
     e.Result = make(map[string]interface{})
     for _, t := range e.Tasks {
-        start := time.Now()
-        e.Logger.Info("开始执行任务：%s", t.GetName())
-        err = t.Init(opts)
-        if err != nil {
-            e.Logger.Error("初始化任务失败: %s", err)
-        }
-        err = t.Run()
-        if err != nil {
-            e.Logger.Warning("执行任务出错: %s", err)
-        }
-        duration := strconv.FormatFloat(time.Now().Sub(start).Seconds(), 'f', 2, 64)
-        e.MergeResult(t.GetResult())
-        e.Logger.Info("执行结束（耗时：%s秒）", duration)
+        e.MergeResult(DoTask(t, opts))
     }
     e.Machine.Down()
     e.Logger.Info("机器名为[%s]的任务全部执行结束\n", e.Machine.Name)
