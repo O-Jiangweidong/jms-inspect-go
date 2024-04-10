@@ -97,9 +97,12 @@ func (t *ServiceTask) GetJMSServiceStatus() {
             ServiceStatus: common.Empty,
         })
     } else {
-        lines := strings.Split(result, "\n")[2:]
+        lines := strings.Split(result, "\n")
         for _, line := range lines {
             ret := strings.Split(line, sep)
+            if len(ret) != 3 {
+                continue
+            }
             portList := strings.Split(strings.Replace(ret[2], " ", "", -1), ",")
             sort.Strings(portList)
             port := strings.Join(portList, "\n")
