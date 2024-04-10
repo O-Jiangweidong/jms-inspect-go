@@ -58,8 +58,8 @@ func main() {
         executor := m.GetExecutor()
         executor.Logger = logger
         result, abnormalResult = executor.Execute(&opts)
-        result["machine_type"] = m.Type
-        result["machine_name"] = m.Name
+        result["MachineType"] = m.Type
+        result["MachineName"] = m.Name
         resultList = append(resultList, result)
         for _, r := range abnormalResult {
             r.NodeName = m.Name

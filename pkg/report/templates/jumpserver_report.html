@@ -219,7 +219,7 @@
 <!--                                    {{ range $i, $m := .NormalResults }}-->
 <!--                                    <li>-->
 <!--                                        <div class="catalog-out">-->
-<!--                                            <div class="catalog-title">2.1.{{ Add $i 1 }} {{ $m.machine_name }}</div>-->
+<!--                                            <div class="catalog-title">2.1.{{ Add $i 1 }} {{ $m.MachineName }}</div>-->
 <!--                                            <div class="catalog-line">&nbsp;</div>-->
 <!--                                            <div class="catalog-page-num">{{ CalcPage $i }}</div>-->
 <!--                                        </div>-->
@@ -372,55 +372,55 @@
                 <table class="v-table">
                     <tr>
                         <th>数据库运行时长</th>
-                        <td>{{ .DBResult.db_operating_time }}</td>
+                        <td>{{ .DBResult.DBOperatingTime }}</td>
                     </tr>
                     <tr>
                         <th>SQL MODE</th>
-                        <td>{{ .DBResult.db_sql_mode }}</td>
+                        <td>{{ .DBResult.DBSqlMode }}</td>
                     </tr>
                     <tr>
                         <th>最大连接数</th>
-                        <td>{{ .DBResult.db_max_connect }}</td>
+                        <td>{{ .DBResult.DBMaxConnect }}</td>
                     </tr>
                     <tr>
                         <th>当前连接数</th>
-                        <td>{{ .DBResult.db_current_connect }}</td>
+                        <td>{{ .DBResult.DBCurrentConnect }}</td>
                     </tr>
                     <tr>
                         <th>QPS</th>
-                        <td>{{ .DBResult.db_qps }}</td>
+                        <td>{{ .DBResult.DBQps }}</td>
                     </tr>
                     <tr>
                         <th>TPS</th>
-                        <td>{{ .DBResult.db_tps }}</td>
+                        <td>{{ .DBResult.DBTps }}</td>
                     </tr>
                     <tr>
                         <th>慢查询数</th>
-                        <td>{{ .DBResult.db_slow_query }}</td>
+                        <td>{{ .DBResult.DBSlowQuery }}</td>
                     </tr>
                     <tr>
                         <th>当前事务数</th>
-                        <td>{{ .DBResult.db_current_transaction }}</td>
+                        <td>{{ .DBResult.DBCurrentTransaction }}</td>
                     </tr>
                     <tr>
                         <th>字符集</th>
-                        <td>{{ .DBResult.db_charset }}</td>
+                        <td>{{ .DBResult.DBCharset }}</td>
                     </tr>
                     <tr>
                         <th>排序规则</th>
-                        <td>{{ .DBResult.db_sort_rule }}</td>
+                        <td>{{ .DBResult.DBSortRule }}</td>
                     </tr>
                     <tr>
                         <th>Slave IO Running</th>
-                        <td>{{ .DBResult.db_slave_io_running }}</td>
+                        <td>{{ .DBResult.DBSlaveIORunning }}</td>
                     </tr>
                     <tr>
                         <th>Slave SQL Running</th>
-                        <td>{{ .DBResult.db_slave_sql_running }}</td>
+                        <td>{{ .DBResult.DBSlaveSqlRunning }}</td>
                     </tr>
                     <tr>
                         <th>总表数</th>
-                        <td>{{ .DBResult.db_table_count }}</td>
+                        <td>{{ .DBResult.DBTableCount }}</td>
                     </tr>
                 </table>
 
@@ -431,7 +431,7 @@
                         <th>记录数</th>
                         <th>表大小(M)</th>
                     </tr>
-                    {{ range .DBResult.top_10_table }}
+                    {{ range .DBResult.Top10Table }}
                     <tr>
                         <td>{{ .TableName }}</td>
                         <td>{{ .TableRecord }}</td>
@@ -460,116 +460,116 @@
                     </tr>
                     <tr>
                         <th>Redis版本</th>
-                        <td>{{ .DBResult.redis_version }}</td>
+                        <td>{{ .DBResult.RedisVersion }}</td>
                     </tr>
                     <tr>
                         <th>Redis模型</th>
-                        <td>{{ .DBResult.redis_mode }}</td>
+                        <td>{{ .DBResult.RedisMode }}</td>
                     </tr>
                     <tr>
                         <th>TCP Port</th>
-                        <td>{{ .DBResult.redis_port }}</td>
+                        <td>{{ .DBResult.RedisPort }}</td>
                     </tr>
                     <tr>
                         <th>运行时间(天)</th>
-                        <td>{{ .DBResult.redis_uptime }}</td>
+                        <td>{{ .DBResult.RedisUptime }}</td>
                     </tr>
                     <tr>
                         <th colspan="2">客户端</th>
                     </tr>
                     <tr>
                         <th>当前连接数</th>
-                        <td>{{ .DBResult.redis_connect }}</td>
+                        <td>{{ .DBResult.RedisConnect }}</td>
                     </tr>
                     <tr>
                         <th>集群连接数</th>
-                        <td>{{ .DBResult.redis_cluster_connect }}</td>
+                        <td>{{ .DBResult.RedisClusterConnect }}</td>
                     </tr>
                     <tr>
                         <th>最大连接数</th>
-                        <td>{{ .DBResult.redis_max_connect }}</td>
+                        <td>{{ .DBResult.RedisMaxConnect }}</td>
                     </tr>
                     <tr>
                         <th>当前阻塞连接</th>
-                        <td>{{ .DBResult.redis_blocked_connect }}</td>
+                        <td>{{ .DBResult.RedisBlockedConnect }}</td>
                     </tr>
                     <tr>
                         <th colspan="2">内存</th>
                     </tr>
                     <tr>
                         <th>已使用内存</th>
-                        <td>{{ .DBResult.used_memory_human }}</td>
+                        <td>{{ .DBResult.UsedMemoryHuman }}</td>
                     </tr>
                     <tr>
                         <th>物理内存占用量</th>
-                        <td>{{ .DBResult.used_memory_rss_human }}</td>
+                        <td>{{ .DBResult.UsedMemoryRssHuman }}</td>
                     </tr>
                     <tr>
                         <th>内存使用最大值</th>
-                        <td>{{ .DBResult.used_memory_peak_human }}</td>
+                        <td>{{ .DBResult.UsedMemoryPeakHuman }}</td>
                     </tr>
                     <tr>
                         <th>Lua使用内存量</th>
-                        <td>{{ .DBResult.used_memory_lua_human }}</td>
+                        <td>{{ .DBResult.UsedMemoryLuaHuman }}</td>
                     </tr>
                     <tr>
                         <th>最大可用内存</th>
-                        <td>{{ .DBResult.maxmemory_human }}</td>
+                        <td>{{ .DBResult.MaxMemoryHuman }}</td>
                     </tr>
                     <tr>
                         <th>淘汰策略</th>
-                        <td>{{ .DBResult.maxmemory_policy }}</td>
+                        <td>{{ .DBResult.MaxMemoryPolicy }}</td>
                     </tr>
                     <tr>
                         <th colspan="2">统计</th>
                     </tr>
                     <tr>
                         <th>共接受的连接数</th>
-                        <td>{{ .DBResult.total_connections_received }}</td>
+                        <td>{{ .DBResult.TotalConnectionsReceived }}</td>
                     </tr>
                     <tr>
                         <th>共处理的命令数</th>
-                        <td>{{ .DBResult.total_commands_processed }}</td>
+                        <td>{{ .DBResult.TotalCommandsProcessed }}</td>
                     </tr>
                     <tr>
                         <th>每秒执行的命令数</th>
-                        <td>{{ .DBResult.instantaneous_ops_per_sec }}</td>
+                        <td>{{ .DBResult.InstantaneousOpsPerSec }}</td>
                     </tr>
                     <tr>
                         <th>入口流量(字节)</th>
-                        <td>{{ .DBResult.total_net_input_bytes }}</td>
+                        <td>{{ .DBResult.TotalNetInputBytes }}</td>
                     </tr>
                     <tr>
                         <th>出口流量(字节)</th>
-                        <td>{{ .DBResult.total_net_output_bytes }}</td>
+                        <td>{{ .DBResult.TotalNetOutputBytes }}</td>
                     </tr>
                     <tr>
                         <th>被拒绝连接数</th>
-                        <td>{{ .DBResult.rejected_connections }}</td>
+                        <td>{{ .DBResult.RejectedConnections }}</td>
                     </tr>
                     <tr>
                         <th>过期键个数</th>
-                        <td>{{ .DBResult.expired_keys }}</td>
+                        <td>{{ .DBResult.ExpiredKeys }}</td>
                     </tr>
                     <tr>
                         <th>执行淘汰策略键个数</th>
-                        <td>{{ .DBResult.evicted_keys }}</td>
+                        <td>{{ .DBResult.EvictedKeys }}</td>
                     </tr>
                     <tr>
                         <th>键命中次数</th>
-                        <td>{{ .DBResult.keyspace_hits }}</td>
+                        <td>{{ .DBResult.KeyspaceHits }}</td>
                     </tr>
                     <tr>
                         <th>键未命中次数</th>
-                        <td>{{ .DBResult.keyspace_misses }}</td>
+                        <td>{{ .DBResult.KeyspaceMisses }}</td>
                     </tr>
                     <tr>
                         <th>发布订阅频道数</th>
-                        <td>{{ .DBResult.pubsub_channels }}</td>
+                        <td>{{ .DBResult.PubSubChannels }}</td>
                     </tr>
                     <tr>
                         <th>发布订阅匹配模式频道数</th>
-                        <td>{{ .DBResult.pubsub_patterns }}</td>
+                        <td>{{ .DBResult.PubSubPatterns }}</td>
                     </tr>
                 </table>
             </div>
@@ -586,44 +586,44 @@
         <div class="page-header"></div>
         <div style="text-align: center">
             <div style="text-align: left; margin: 0 5%">
-                <h3>3.1.{{ Add $i 1 }} {{ $m.machine_name }}</h3>
+                <h3>3.1.{{ Add $i 1 }} {{ $m.MachineName }}</h3>
                 <table class="v-table">
                     <caption>系统信息如下表：</caption>
                     <tr>
                         <th>主机名</th>
-                        <td>{{ $m.machine_hostname }}</td>
+                        <td>{{ $m.MachineHostname }}</td>
                     </tr>
                     <tr>
                         <th>语言</th>
-                        <td>{{ $m.machine_language }}</td>
+                        <td>{{ $m.MachineLanguage }}</td>
                     </tr>
                     <tr>
-                        <th>IP</th>
-                        <td>{{ $m.machine_ip }}</td>
+                        <th>地址</th>
+                        <td>{{ $m.MachineAddress }}</td>
                     </tr>
                     <tr>
                         <th>系统版本</th>
-                        <td>{{ $m.os_version }}</td>
+                        <td>{{ $m.OsVersion }}</td>
                     </tr>
                     <tr>
                         <th>内核版本</th>
-                        <td>{{ $m.kernel_version }}</td>
+                        <td>{{ $m.KernelVersion }}</td>
                     </tr>
                     <tr>
                         <th>CPU架构</th>
-                        <td>{{ $m.cpu_arch }}</td>
+                        <td>{{ $m.CpuArch }}</td>
                     </tr>
                     <tr>
                         <th>当前时间</th>
-                        <td>{{ $m.current_time }}</td>
+                        <td>{{ $m.CurrentTime }}</td>
                     </tr>
                     <tr>
                         <th>最后启动时间</th>
-                        <td>{{ $m.last_up_time }}</td>
+                        <td>{{ $m.LastUpTime }}</td>
                     </tr>
                     <tr>
                         <th>运行天数</th>
-                        <td>{{ $m.operating_time }}</td>
+                        <td>{{ $m.OperatingTime }}</td>
                     </tr>
                 </table>
                 <br>
@@ -631,19 +631,19 @@
                     <caption>CPU信息如下表：</caption>
                     <tr>
                         <th>物理CPU个数</th>
-                        <td>{{ $m.cpu_num }}</td>
+                        <td>{{ $m.CpuNum }}</td>
                     </tr>
                     <tr>
                         <th>每物理CPU核数</th>
-                        <td>{{ $m.cpu_physical_cores }}</td>
+                        <td>{{ $m.CpuPhysicalCores }}</td>
                     </tr>
                     <tr>
                         <th>逻辑CPU核数</th>
-                        <td>{{ $m.cpu_logical_cores }}</td>
+                        <td>{{ $m.CpuLogicalCores }}</td>
                     </tr>
                     <tr>
                         <th>CPU型号</th>
-                        <td>{{ $m.cpu_model }}</td>
+                        <td>{{ $m.CpuModel }}</td>
                     </tr>
                 </table>
                 <br>
@@ -651,27 +651,27 @@
                     <caption>内存信息如下表：</caption>
                     <tr>
                         <th>内存总量</th>
-                        <td>{{ $m.memory_total }}</td>
+                        <td>{{ $m.MemoryTotal }}</td>
                     </tr>
                     <tr>
                         <th>内存已使用量</th>
-                        <td>{{ $m.memory_used }}</td>
+                        <td>{{ $m.MemoryUsed }}</td>
                     </tr>
                     <tr>
                         <th>内存空闲</th>
-                        <td>{{ $m.memory_available }}</td>
+                        <td>{{ $m.MemoryAvailable }}</td>
                     </tr>
                     <tr>
                         <th>SWAP总量</th>
-                        <td>{{ $m.swap_total }}</td>
+                        <td>{{ $m.SwapTotal }}</td>
                     </tr>
                     <tr>
                         <th>SWAP已使用</th>
-                        <td>{{ $m.swap_used }}</td>
+                        <td>{{ $m.SwapUsed }}</td>
                     </tr>
                     <tr>
                         <th>SWAP空闲</th>
-                        <td>{{ $m.swap_free }}</td>
+                        <td>{{ $m.SwapFree }}</td>
                     </tr>
                 </table>
                 <br>
@@ -679,27 +679,27 @@
                     <caption>其他系统参数如下表：</caption>
                     <tr>
                         <th>SELinux是否开启</th>
-                        <td>{{ $m.selinux_enable }}</td>
+                        <td>{{ $m.SelinuxEnable }}</td>
                     </tr>
                     <tr>
                         <th>防火墙是否开启</th>
-                        <td>{{ $m.firewall_enable }}</td>
+                        <td>{{ $m.FirewallEnable }}</td>
                     </tr>
                     <tr>
                         <th>是否配置定时任务</th>
-                        <td>{{ $m.exist_crontab }}</td>
+                        <td>{{ $m.CrontabEnable }}</td>
                     </tr>
                     <tr>
                         <th>是否开启RSyslog</th>
-                        <td>{{ $m.rsyslog_enable }}</td>
+                        <td>{{ $m.RsyslogEnable }}</td>
                     </tr>
                     <tr>
                         <th nowrap="nowrap">是否存在僵尸进程</th>
-                        <td>{{ $m.exist_zombie }}</td>
+                        <td>{{ $m.ExistZombie }}</td>
                     </tr>
                     <tr>
                         <th>系统开放端口</th>
-                        <td>{{ $m.expose_port }}</td>
+                        <td>{{ $m.ExposePort }}</td>
                     </tr>
                 </table>
             </div>
@@ -709,7 +709,7 @@
             <div class="page-footer-company"></div>
         </div>
     </div>
-    {{ if eq $m.machine_type "jumpserver" }}
+    {{ if eq $m.MachineType "jumpserver" }}
     <div class="page">
         <div class="page-header"></div>
         <div style="text-align: center">
@@ -719,35 +719,63 @@
                     <caption>JumpServer服务占用磁盘情况如下表：</caption>
                     <tr>
                         <th>录像目录地址</th>
-                        <td>{{ $m.replay_path }}</td>
+                        <td>{{ $m.ReplayPath }}</td>
                     </tr>
                     <tr>
                         <th>录像目录总大小</th>
-                        <td>{{ $m.replay_total }}</td>
+                        <td>{{ $m.ReplayTotal }}</td>
                     </tr>
                     <tr>
                         <th>录像目录已使用</th>
-                        <td>{{ $m.replay_used }}</td>
+                        <td>{{ $m.ReplayUsed }}</td>
                     </tr>
                     <tr>
                         <th>录像目录空闲大小</th>
-                        <td>{{ $m.replay_unused }}</td>
+                        <td>{{ $m.ReplayUnused }}</td>
                     </tr>
                     <tr>
-                        <th>Web组件日志总大小</th>
-                        <td>{{ $m.nginx_log_size }}</td>
+                        <th>Nginx 组件日志总大小</th>
+                        <td>{{ $m.nginxLogSize }}</td>
                     </tr>
                     <tr>
-                        <th>Core组件日志总大小</th>
-                        <td>{{ $m.core_log_size }}</td>
+                        <th>Core 组件日志总大小</th>
+                        <td>{{ $m.coreLogSize }}</td>
                     </tr>
                     <tr>
-                        <th>Koko组件日志总大小</th>
-                        <td>{{ $m.koko_log_size }}</td>
+                        <th>Koko 组件日志总大小</th>
+                        <td>{{ $m.kokoLogSize }}</td>
                     </tr>
                     <tr>
-                        <th>Lion组件日志总大小</th>
-                        <td>{{ $m.lion_log_size }}</td>
+                        <th>Lion 组件日志总大小</th>
+                        <td>{{ $m.lionLogSize }}</td>
+                    </tr>
+                    <tr>
+                        <th>Chen 组件日志总大小</th>
+                        <td>{{ $m.chenLogSize }}</td>
+                    </tr>
+                    <tr>
+                        <th>Kael 组件日志总大小</th>
+                        <td>{{ $m.kaelLogSize }}</td>
+                    </tr>
+                    <tr>
+                        <th>Magnus 组件日志总大小</th>
+                        <td>{{ $m.magnusLogSize }}</td>
+                    </tr>
+                    <tr>
+                        <th>Panda 组件日志总大小</th>
+                        <td>{{ $m.pandaLogSize }}</td>
+                    </tr>
+                    <tr>
+                        <th>Razor 组件日志总大小</th>
+                        <td>{{ $m.razorLogSize }}</td>
+                    </tr>
+                    <tr>
+                        <th>Video 组件日志总大小</th>
+                        <td>{{ $m.videoLogSize }}</td>
+                    </tr>
+                    <tr>
+                        <th>XRdp 组件日志总大小</th>
+                        <td>{{ $m.xrdpLogSize }}</td>
                     </tr>
                 </table>
                 <br>
@@ -758,7 +786,7 @@
                         <th>状态</th>
                         <th>端口</th>
                     </tr>
-                    {{ range $m.component_info }}
+                    {{ range $m.ComponentInfo }}
                     <tr>
                         <td>{{ .ServiceName }}</td>
                         <td>{{ .ServiceStatus }}</td>
@@ -791,7 +819,7 @@
                         <th>使用率</th>
                         <th>挂载点</th>
                     </tr>
-                    {{ range $m.disk_info_list }}
+                    {{ range $m.DiskInfoList }}
                     <tr>
                         <td>{{ .FileSystem }}</td>
                         <td>{{ .FileType }}</td>
@@ -818,61 +846,61 @@
             <div style="text-align: left; margin: 0 5%">
                 <h3>4.1 运营巡检</h3>
                 <small>
-                    当前共有 <strong>{{ .VirtualResult.organization_count }}</strong> 个组织，<strong>{{ .VirtualResult.user_count }}</strong> 个用户，<strong>{{ .VirtualResult.asset_count }}</strong> 个资产(前三: {{ .VirtualResult.asset_count_display }})，<strong>{{ .VirtualResult.online_session }}</strong> 个在线会话。最大单日登录次数 <strong>{{ .VirtualResult.max_login_count }}</strong> 次，最大单日访问资产数 <strong>{{ .VirtualResult.max_connect_asset_count }}</strong> 次, 详细指标数据参见下表。
+                    当前共有 <strong>{{ .VirtualResult.OrganizationCount }}</strong> 个组织，<strong>{{ .VirtualResult.UserCount }}</strong> 个用户，<strong>{{ .VirtualResult.AssetCount }}</strong> 个资产(前三: {{ .VirtualResult.AssetCountDisplay }})，<strong>{{ .VirtualResult.OnlineSession }}</strong> 个在线会话。最大单日登录次数 <strong>{{ .VirtualResult.MaxLoginCount }}</strong> 次，最大单日访问资产数 <strong>{{ .VirtualResult.MaxConnectAssetCount }}</strong> 次, 详细指标数据参见下表。
                 </small>
                 <br>
                 <table class="v-table">
                     <tr>
                         <th>近三月最大单日用户登录数</th>
-                        <td>{{ .VirtualResult.last_3_month_max_login_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthMaxLoginCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月最大单日资产登录数 </th>
-                        <td>{{ .VirtualResult.last_3_month_max_connect_asset_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthMaxConnectAssetCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月登录用户数</th>
-                        <td>{{ .VirtualResult.last_3_month_login_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthLoginCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月登录资产数</th>
-                        <td>{{ .VirtualResult.last_3_month_connect_asset_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthConnectAssetCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月文件上传数</th>
-                        <td>{{ .VirtualResult.last_3_month_upload_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthUploadCount }}</td>
                     </tr>
                     <tr>
                         <th>近一月登录用户数 </th>
-                        <td>{{ .VirtualResult.last_1_month_login_count }}</td>
+                        <td>{{ .VirtualResult.Last1MonthLoginCount }}</td>
                     </tr>
                     <tr>
                         <th>近一月登录资产数</th>
-                        <td>{{ .VirtualResult.last_1_month_connect_asset_count }}</td>
+                        <td>{{ .VirtualResult.Last1MonthConnectAssetCount }}</td>
                     </tr>
                     <tr>
                         <th>近一月文件上传次数</th>
-                        <td>{{ .VirtualResult.last_1_month_upload_count }}</td>
+                        <td>{{ .VirtualResult.Last1MonthUploadCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月命令记录数</th>
-                        <td>{{ .VirtualResult.last_3_month_command_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthCommandCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月高危命令记录数</th>
-                        <td>{{ .VirtualResult.last_3_month_danger_command_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthDangerCommandCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月最大会话时长</th>
-                        <td>{{ .VirtualResult.last_3_month_max_session_duration }}</td>
+                        <td>{{ .VirtualResult.Last3MonthMaxSessionDuration }}</td>
                     </tr>
                     <tr>
                         <th>近三月平均会话时长(秒)</th>
-                        <td>{{ .VirtualResult.last_3_month_avg_session_duration }}</td>
+                        <td>{{ .VirtualResult.Last3MonthAvgSessionDuration }}</td>
                     </tr>
                     <tr>
                         <th>近三月工单申请数</th>
-                        <td>{{ .VirtualResult.last_3_month_ticket_count }}</td>
+                        <td>{{ .VirtualResult.Last3MonthTicketCount }}</td>
                     </tr>
                 </table>
                 <br>
@@ -937,7 +965,7 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.user_login_chart.X }}
+            data: {{ .VirtualResult.UserLoginChart.X }}
     },
     yAxis: {},
     series: [{
@@ -949,7 +977,7 @@
                 { offset: 0, color: '#4b917d' }
             ])
         },
-        data: {{ .VirtualResult.user_login_chart.Y }}
+        data: {{ .VirtualResult.UserLoginChart.Y }}
     }]
     };
     userChart.setOption(userChartOption);
@@ -963,7 +991,7 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.asset_connect_chart.X }}
+            data: {{ .VirtualResult.AssetConnectChart.X }}
     },
     yAxis: {},
     series: [{
@@ -975,7 +1003,7 @@
                 { offset: 0, color: '#77b2df' }
             ])
         },
-        data: {{ .VirtualResult.asset_connect_chart.Y }}
+        data: {{ .VirtualResult.AssetConnectChart.Y }}
     }]
     };
     assetChart.setOption(assetChartOption);
@@ -989,12 +1017,12 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.active_user_chart.X }}
+            data: {{ .VirtualResult.ActiveUserChart.X }}
     },
     yAxis: {},
     series: [{
         type: 'bar',
-        data: {{ .VirtualResult.active_user_chart.Y }}
+        data: {{ .VirtualResult.ActiveUserChart.Y }}
     }]
     };
     activeUserChart.setOption(activeUserChartOption);
@@ -1008,12 +1036,12 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.active_asset_chart.X }}
+            data: {{ .VirtualResult.ActiveAssetChart.X }}
     },
     yAxis: {},
     series: [{
         type: 'bar',
-        data: {{ .VirtualResult.active_asset_chart.Y }}
+        data: {{ .VirtualResult.ActiveAssetChart.Y }}
     }]
     };
     activeAssetChart.setOption(activeAssetChartOption);
@@ -1050,7 +1078,7 @@
                     fontWeight: 'bold'
                 }
             },
-            data: {{ .VirtualResult.protocol_chart }}
+            data: {{ .VirtualResult.ProtocolChart }}
     }]
     };
     protocolChart.setOption(protocolChartOption);

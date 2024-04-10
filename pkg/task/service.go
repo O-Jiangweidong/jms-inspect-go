@@ -25,23 +25,23 @@ type ServiceTask struct {
 func (t *ServiceTask) GetReplayPathInfo() {
     volumeDir := t.GetConfig("VOLUME_DIR", "/")
     replayPath := filepath.Join(volumeDir, "core", "data", "media", "replay")
-    t.result["replay_path"] = replayPath
+    t.result["ReplayPath"] = replayPath
     // 总大小
     cmd := fmt.Sprintf(
         "[ -d %s ] && df -h %s --output=size| awk '{if (NR > 1) {print $1}}' || echo '0'",
         replayPath, replayPath,
     )
     if result, err := t.Machine.DoCommand(cmd); err == nil && result != common.EmptyFlag {
-        t.result["replay_total"] = result
+        t.result["ReplayTotal"] = result
     } else {
-        t.result["replay_total"] = common.Empty
+        t.result["ReplayTotal"] = common.Empty
     }
     // 已经使用
     cmd = fmt.Sprintf(ComputeSpaceCommand, replayPath, replayPath, common.EmptyFlag)
     if result, err := t.Machine.DoCommand(cmd); err == nil && result != common.EmptyFlag {
-        t.result["replay_used"] = result
+        t.result["ReplayUsed"] = result
     } else {
-        t.result["replay_used"] = common.Empty
+        t.result["ReplayUsed"] = common.Empty
     }
     // 未使用
     cmd = fmt.Sprintf(
@@ -50,17 +50,17 @@ func (t *ServiceTask) GetReplayPathInfo() {
     )
     if result, err := t.Machine.DoCommand(cmd); err == nil && result != common.EmptyFlag {
         if size, err := strconv.ParseInt(result, 10, 64); err != nil {
-            t.result["replay_unused"] = common.Empty
+            t.result["ReplayUnused"] = common.Empty
         } else {
             sizeDisplay := common.SpaceDisplay(size)
-            t.result["replay_unused"] = sizeDisplay
+            t.result["ReplayUnused"] = sizeDisplay
             if size <= 50*1024 {
                 desc := fmt.Sprintf("录像空间大小不足，当前大小: %s", sizeDisplay)
                 t.SetAbnormalEvent(desc, common.Critical)
             }
         }
     } else {
-        t.result["replay_unused"] = common.Empty
+        t.result["ReplayUnused"] = common.Empty
     }
 }
 
@@ -80,9 +80,9 @@ func (t *ServiceTask) GetComponentLogSize() {
         }
         cmd := fmt.Sprintf(ComputeSpaceCommand, logPath, logPath, common.EmptyFlag)
         if result, err := t.Machine.DoCommand(cmd); err == nil {
-            t.result[name+"_log_size"] = result
+            t.result[name+"LogSize"] = result
         } else {
-            t.result[name+"_log_size"] = common.Empty
+            t.result[name+"LogSize"] = common.Empty
         }
     }
 }
@@ -108,7 +108,7 @@ func (t *ServiceTask) GetJMSServiceStatus() {
             })
         }
     }
-    t.result["component_info"] = components
+    t.result["ComponentInfo"] = components
 }
 
 func (t *ServiceTask) GetName() string {

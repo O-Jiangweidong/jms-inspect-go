@@ -95,7 +95,7 @@ func (t *DBTask) GetTableInfo() error {
         _ = rows.Scan(&table.TableName, &table.TableRecord, &table.TableSize)
         tables = append(tables, table)
     }
-    t.result["top_10_table"] = tables
+    t.result["Top10Table"] = tables
     return nil
 }
 
@@ -114,14 +114,14 @@ func (t *DBTask) GetDBInfo() error {
     questions := t.dbGet("Questions", "0")
     upTimeInt, _ := strconv.Atoi(upTime)
     questionsInt, _ := strconv.Atoi(questions)
-    t.result["db_qps"] = questionsInt / upTimeInt
+    t.result["DBQps"] = questionsInt / upTimeInt
     // TPS 计算
     commit := t.dbGet("Com_commit", "0")
     rollback := t.dbGet("Com_rollback", "0")
     commitInt, _ := strconv.Atoi(commit)
     rollbackInt, _ := strconv.Atoi(rollback)
     tps := (commitInt + rollbackInt) / upTimeInt
-    t.result["db_tps"] = tps
+    t.result["DBTps"] = tps
     // 获取slave信息
     dbSlaveSqlRunning := common.Empty
     dbSlaveIORunning := common.Empty
@@ -147,26 +147,26 @@ func (t *DBTask) GetDBInfo() error {
             }
         }
     }
-    t.result["db_slave_io_running"] = dbSlaveIORunning
-    t.result["db_slave_sql_running"] = dbSlaveSqlRunning
+    t.result["DBSlaveIORunning"] = dbSlaveIORunning
+    t.result["DBSlaveSqlRunning"] = dbSlaveSqlRunning
     // 获取表数量
     var tableCount string
     tableCountQuery := "SELECT COUNT(*) FROM information_schema.tables WHERE table_type='BASE TABLE'"
     _ = t.mysqlClient.QueryRow(tableCountQuery).Scan(&tableCount)
-    t.result["db_table_count"] = tableCount
+    t.result["DBTableCount"] = tableCount
     // 获取当前事务数量
     var trxQueryCount string
     trxQuery := "SELECT count(*) FROM information_schema.innodb_trx"
     _ = t.mysqlClient.QueryRow(trxQuery).Scan(&trxQueryCount)
-    t.result["db_current_transaction"] = trxQueryCount
+    t.result["DBCurrentTransaction"] = trxQueryCount
     // 其他
-    t.result["db_operating_time"] = common.SecondDisplay(upTimeInt)
-    t.result["db_sql_mode"] = t.dbGet("sql_mode", common.Empty)
-    t.result["db_max_connect"] = t.dbGet("max_connections", common.Empty)
-    t.result["db_current_connect"] = t.dbGet("Threads_connected", common.Empty)
-    t.result["db_slow_query"] = t.dbGet("slow_query_log", common.Empty)
-    t.result["db_charset"] = t.dbGet("character_set_database", common.Empty)
-    t.result["db_sort_rule"] = t.dbGet("collation_database", common.Empty)
+    t.result["DBOperatingTime"] = common.SecondDisplay(upTimeInt)
+    t.result["DBSqlMode"] = t.dbGet("sql_mode", common.Empty)
+    t.result["DBMaxConnect"] = t.dbGet("max_connections", common.Empty)
+    t.result["DBCurrentConnect"] = t.dbGet("Threads_connected", common.Empty)
+    t.result["DBSlowQuery"] = t.dbGet("slow_query_log", common.Empty)
+    t.result["DBCharset"] = t.dbGet("character_set_database", common.Empty)
+    t.result["DBSortRule"] = t.dbGet("collation_database", common.Empty)
     return nil
 }
 
@@ -209,38 +209,38 @@ func (t *DBTask) GetRedisInfo() error {
 
     t.result["HasRedisInfo"] = true
     // service info
-    t.result["redis_version"] = t.Get("redis_version")
-    t.result["redis_mode"] = t.Get("redis_mode")
-    t.result["redis_port"] = t.Get("tcp_port")
-    t.result["redis_uptime"] = t.Get("uptime_in_days")
+    t.result["RedisVersion"] = t.Get("redis_version")
+    t.result["RedisMode"] = t.Get("redis_mode")
+    t.result["RedisPort"] = t.Get("tcp_port")
+    t.result["RedisUptime"] = t.Get("uptime_in_days")
 
     // client info
-    t.result["redis_connect"] = t.Get("connected_clients")
-    t.result["redis_cluster_connect"] = t.Get("cluster_connections")
-    t.result["redis_max_connect"] = t.Get("maxclients")
-    t.result["redis_blocked_connect"] = t.Get("blocked_clients")
+    t.result["RedisConnect"] = t.Get("connected_clients")
+    t.result["RedisClusterConnect"] = t.Get("cluster_connections")
+    t.result["RedisMaxConnect"] = t.Get("maxclients")
+    t.result["RedisBlockedConnect"] = t.Get("blocked_clients")
 
     // memory info
-    t.result["used_memory_human"] = t.Get("used_memory_human")
-    t.result["used_memory_rss_human"] = t.Get("used_memory_rss_human")
-    t.result["used_memory_peak_human"] = t.Get("used_memory_peak_human")
-    t.result["used_memory_lua_human"] = t.Get("used_memory_lua_human")
-    t.result["maxmemory_human"] = t.Get("maxmemory_human")
-    t.result["maxmemory_policy"] = t.Get("maxmemory_policy")
+    t.result["UsedMemoryHuman"] = t.Get("used_memory_human")
+    t.result["UsedMemoryRssHuman"] = t.Get("used_memory_rss_human")
+    t.result["UsedMemoryPeakHuman"] = t.Get("used_memory_peak_human")
+    t.result["UsedMemoryLuaHuman"] = t.Get("used_memory_lua_human")
+    t.result["MaxMemoryHuman"] = t.Get("maxmemory_human")
+    t.result["MaxMemoryPolicy"] = t.Get("maxmemory_policy")
 
     // statistics info
-    t.result["total_connections_received"] = t.Get("total_connections_received")
-    t.result["total_commands_processed"] = t.Get("total_commands_processed")
-    t.result["instantaneous_ops_per_sec"] = t.Get("instantaneous_ops_per_sec")
-    t.result["total_net_input_bytes"] = t.Get("total_net_input_bytes")
-    t.result["total_net_output_bytes"] = t.Get("total_net_output_bytes")
-    t.result["rejected_connections"] = t.Get("rejected_connections")
-    t.result["expired_keys"] = t.Get("expired_keys")
-    t.result["evicted_keys"] = t.Get("evicted_keys")
-    t.result["keyspace_hits"] = t.Get("keyspace_hits")
-    t.result["keyspace_misses"] = t.Get("keyspace_misses")
-    t.result["pubsub_channels"] = t.Get("pubsub_channels")
-    t.result["pubsub_patterns"] = t.Get("pubsub_patterns")
+    t.result["TotalConnectionsReceived"] = t.Get("total_connections_received")
+    t.result["TotalCommandsProcessed"] = t.Get("total_commands_processed")
+    t.result["InstantaneousOpsPerSec"] = t.Get("instantaneous_ops_per_sec")
+    t.result["TotalNetInputBytes"] = t.Get("total_net_input_bytes")
+    t.result["TotalNetOutputBytes"] = t.Get("total_net_output_bytes")
+    t.result["RejectedConnections"] = t.Get("rejected_connections")
+    t.result["ExpiredKeys"] = t.Get("expired_keys")
+    t.result["EvictedKeys"] = t.Get("evicted_keys")
+    t.result["KeyspaceHits"] = t.Get("keyspace_hits")
+    t.result["KeyspaceMisses"] = t.Get("keyspace_misses")
+    t.result["PubSubChannels"] = t.Get("pubsub_channels")
+    t.result["PubSubPatterns"] = t.Get("pubsub_patterns")
 
     return nil
 }
