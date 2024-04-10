@@ -69,12 +69,15 @@ type Options struct {
     ReportType      string
     JMSConfigPath   string
     MachineInfoPath string
+    ExcludeTask     string
 
     // 解析的参数
     JMSConfig   map[string]string
     MachineSet  []Machine
     MySQLClient *sql.DB
     RedisClient *redis.Client
+    EnableRedis bool
+    EnableMySQL bool
 }
 
 func (o *Options) Clear() {
@@ -83,6 +86,18 @@ func (o *Options) Clear() {
     }
     if o.RedisClient != nil {
         _ = o.RedisClient.Close()
+    }
+}
+
+func (o *Options) Transform() {
+    o.EnableMySQL, o.EnableRedis = true, true
+    for _, taskName := range strings.Split(o.ExcludeTask, ",") {
+        switch strings.TrimSpace(taskName) {
+        case "mysql":
+            o.EnableMySQL = false
+        case "redis":
+            o.EnableRedis = false
+        }
     }
 }
 
@@ -117,6 +132,10 @@ func (o *Options) GetMySQLClient() (*sql.DB, error) {
 }
 
 func (o *Options) CheckMySQL() error {
+    if !o.EnableMySQL {
+        return nil
+    }
+    o.Logger.Debug("正在根据 JC 配置文件，检查 JumpServer MySQL 是否可连接...")
     db, err := o.GetMySQLClient()
     if err != nil {
         return err
@@ -190,6 +209,10 @@ func (o *Options) GetRedisClient() *redis.Client {
 }
 
 func (o *Options) CheckRedis() error {
+    if !o.EnableRedis {
+        return nil
+    }
+    o.Logger.Debug("正在根据 JC 配置文件，检查 JumpServer Redis 是否可连接...")
     rdb := o.GetRedisClient()
     o.RedisClient = rdb
     defer func(rdb *redis.Client) {
@@ -202,7 +225,6 @@ func (o *Options) CheckRedis() error {
 }
 
 func (o *Options) CheckDB() error {
-    o.Logger.Debug("正在根据 JC 配置文件，检查 JumpServer 数据库是否可连接...")
     if err := o.CheckMySQL(); err != nil {
         return err
     }
@@ -322,6 +344,7 @@ func (o *Options) CheckMachine() error {
 }
 
 func (o *Options) Valid() error {
+    o.Transform()
     if err := o.CheckJMSConfig(); err != nil {
         return err
     }

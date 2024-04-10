@@ -30,6 +30,10 @@ func main() {
         &opts.MachineInfoPath, "mt", opts.MachineInfoPath,
         "待巡检机器配置文件路径(查看脚本压缩包内 demo.csv 文件)",
     )
+    flag.StringVar(
+        &opts.ExcludeTask, "et", opts.ExcludeTask,
+        "不执行的任务，多个任务中间用逗号隔开(mysql、redis)",
+    )
     flag.Parse()
 
     logger.Debug("开始检查配置等相关信息...")

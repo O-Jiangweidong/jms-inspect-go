@@ -171,7 +171,7 @@ func (t *DBTask) GetDBInfo() error {
 }
 
 func (t *DBTask) GetMySQLInfo() error {
-    t.result["HasMySQLInfo"] = true
+    t.result["HasMySQLInfo"] = t.Options.EnableMySQL
 
     if err := t.GetTableInfo(); err != nil {
         return err
@@ -207,7 +207,7 @@ func (t *DBTask) GetRedisInfo() error {
         return err
     }
 
-    t.result["HasRedisInfo"] = true
+    t.result["HasRedisInfo"] = t.Options.EnableRedis
     // service info
     t.result["RedisVersion"] = t.Get("redis_version")
     t.result["RedisMode"] = t.Get("redis_mode")
