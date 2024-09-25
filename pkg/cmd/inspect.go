@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -11,6 +13,7 @@ import (
 )
 
 const DefaultJMSConfigPath = "/opt/jumpserver/config/config.txt"
+const version = "v0.0.3"
 
 var logger *common.Logger
 
@@ -19,6 +22,12 @@ func main() {
 	opts := task.Options{Logger: logger}
 	defer opts.Clear()
 
+	flag.Usage = func() {
+		_, _ = fmt.Fprintf(os.Stderr, "JumpServer 巡检脚本工具, %s\n", version)
+		_, _ = fmt.Fprintf(os.Stderr, "该工具用于自动化检查系统中各个组件的状态，包括网络连接、服务运行情况等。通过此工具，您可以快速识别潜在问题，提高系统维护效率。\n\n")
+		_, _ = fmt.Fprintf(os.Stderr, "使用方法:\n\t jms_inspect[exe] -参数选项 参数值\n")
+		flag.PrintDefaults()
+	}
 	flag.StringVar(
 		&opts.JMSConfigPath, "jc", DefaultJMSConfigPath, "堡垒机配置文件路径",
 	)
