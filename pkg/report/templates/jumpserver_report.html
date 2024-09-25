@@ -778,6 +778,17 @@
                         <td>{{ $m.xrdpLogSize }}</td>
                     </tr>
                 </table>
+            </div>
+        </div>
+        <div class="page-footer">
+            <div>第 {{ GetPage }} 页</div>
+            <div class="page-footer-company"></div>
+        </div>
+    </div>
+    <div class="page">
+        <div class="page-header"></div>
+        <div style="text-align: center">
+            <div style="text-align: left; margin: 0 5%">
                 <br>
                 <table>
                     <caption>JumpServer服务组件状态如下表：</caption>
@@ -965,20 +976,20 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.UserLoginChart.X }}
-    },
-    yAxis: {},
-    series: [{
-        type: 'line',
-        smooth: true,
-        areaStyle: {
-            opacity: 0.8,
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#4b917d' }
-            ])
+            data: {{ or .VirtualResult.UserLoginChart.X "[]"}}
         },
-        data: {{ .VirtualResult.UserLoginChart.Y }}
-    }]
+        yAxis: {},
+        series: [{
+            type: 'line',
+            smooth: true,
+            areaStyle: {
+                opacity: 0.8,
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#4b917d' }
+                ])
+            },
+            data: {{ or .VirtualResult.UserLoginChart.Y "[]"}}
+        }]
     };
     userChart.setOption(userChartOption);
 
@@ -991,20 +1002,20 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.AssetConnectChart.X }}
-    },
-    yAxis: {},
-    series: [{
-        type: 'line',
-        smooth: true,
-        areaStyle: {
-            opacity: 0.8,
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#77b2df' }
-            ])
+            data: {{ or .VirtualResult.AssetConnectChart.X "[]"}}
         },
-        data: {{ .VirtualResult.AssetConnectChart.Y }}
-    }]
+        yAxis: {},
+        series: [{
+            type: 'line',
+            smooth: true,
+            areaStyle: {
+                opacity: 0.8,
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#77b2df' }
+                ])
+            },
+            data: {{ or .VirtualResult.AssetConnectChart.Y "[]"}}
+        }]
     };
     assetChart.setOption(assetChartOption);
 
@@ -1017,13 +1028,13 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.ActiveUserChart.X }}
-    },
-    yAxis: {},
-    series: [{
-        type: 'bar',
-        data: {{ .VirtualResult.ActiveUserChart.Y }}
-    }]
+            data: {{ or .VirtualResult.ActiveUserChart.X "[]"}}
+        },
+        yAxis: {},
+        series: [{
+            type: 'bar',
+            data: {{ or .VirtualResult.ActiveUserChart.Y "[]"}}
+        }]
     };
     activeUserChart.setOption(activeUserChartOption);
 
@@ -1036,13 +1047,13 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ .VirtualResult.ActiveAssetChart.X }}
-    },
-    yAxis: {},
-    series: [{
-        type: 'bar',
-        data: {{ .VirtualResult.ActiveAssetChart.Y }}
-    }]
+            data: {{ or .VirtualResult.ActiveAssetChart.X "[]"}}
+        },
+        yAxis: {},
+        series: [{
+            type: 'bar',
+            data: {{ or .VirtualResult.ActiveAssetChart.Y "[]"}}
+        }]
     };
     activeAssetChart.setOption(activeAssetChartOption);
 
@@ -1078,8 +1089,8 @@
                     fontWeight: 'bold'
                 }
             },
-            data: {{ .VirtualResult.ProtocolChart }}
-    }]
+            data: {{ or .VirtualResult.ProtocolChart "[]"}}
+        }]
     };
     protocolChart.setOption(protocolChartOption);
 </script>
