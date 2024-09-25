@@ -279,7 +279,7 @@ func (o *Options) CheckMachine() error {
 	var invalidMachines []Machine
 	machineNameSet := make(map[string]bool)
 	var nameIdx, typeIdx, hostIdx, portIdx, usernameIdx, passwordIdx int
-	var privilegeTypeIdx, privilegePwdIdx int = -1, -1
+	var privilegeTypeIdx, privilegePwdIdx = -1, -1
 	for index, row := range rows {
 		if index == 0 {
 			for rowIdx, rowValue := range row {
@@ -309,7 +309,7 @@ func (o *Options) CheckMachine() error {
 		}
 		name, type_, host, port := row[nameIdx], row[typeIdx], row[hostIdx], row[portIdx]
 		username, password, valid := row[usernameIdx], row[passwordIdx], "×"
-		var privilegeType, privilegePwd string = "", ""
+		var privilegeType, privilegePwd = "无", ""
 		if privilegeTypeIdx != -1 {
 			privilegeType = row[privilegeTypeIdx]
 		}
@@ -320,7 +320,7 @@ func (o *Options) CheckMachine() error {
 			title := fmt.Sprintf("请输入主机为 %s([%s])，用户名 [%s] 的密码：", name, host, username)
 			password = o.getPasswordFromUser(title)
 		}
-		if privilegeType != "" && privilegePwd == "" {
+		if privilegeType != "无" && privilegePwd == "" {
 			title := fmt.Sprintf("请输入主机为 %s([%s])，root 的密码：", name, host)
 			privilegePwd = o.getPasswordFromUser(title)
 		}
@@ -333,8 +333,8 @@ func (o *Options) CheckMachine() error {
 		} else {
 			machineNameSet[name] = true
 		}
-		o.Logger.Debug("正在检查机器 %s([%s]) 是否可连接...", machine.Name, machine.Host)
-		if machine.Connect() {
+		o.Logger.MsgOneLine("\t%v: 正在检查机器 %s([%s]) 是否可连接...", index, machine.Name, machine.Host)
+		if err = machine.Connect(); err == nil {
 			machine.Valid = true
 			o.MachineSet = append(o.MachineSet, machine)
 			valid = "✔"

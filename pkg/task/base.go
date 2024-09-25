@@ -25,7 +25,7 @@ type Machine struct {
 	Client *ssh.Client `json:"-"`
 }
 
-func (m *Machine) Connect() bool {
+func (m *Machine) Connect() error {
 	sshConfig := &ssh.ClientConfig{
 		User:            m.Username,
 		Auth:            []ssh.AuthMethod{ssh.Password(m.Password)},
@@ -34,13 +34,13 @@ func (m *Machine) Connect() bool {
 	}
 	address := fmt.Sprintf("%s:%s", m.Host, m.Port)
 	if client, err := ssh.Dial("tcp", address, sshConfig); err != nil {
-		return false
+		return err
 	} else {
 		m.Client = client
 		if _, err = m.DoCommand("whoami"); err != nil {
-			return false
+			return err
 		}
-		return true
+		return nil
 	}
 }
 
