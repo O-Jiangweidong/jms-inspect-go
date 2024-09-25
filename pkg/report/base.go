@@ -13,7 +13,7 @@ type BaseReport struct {
 }
 
 func (r *BaseReport) GetReportFile(ext string) (*os.File, error) {
-	filename := fmt.Sprintf("JumpServer巡检报告_%s.%s", common.CurrentDatetime(true), ext)
+	filename := fmt.Sprintf("JumpServer巡检报告_%s.%s", common.CurrentDatetime("file"), ext)
 	outputDir, err := common.GetOutputDir()
 	if err != nil {
 		return nil, err

@@ -63,12 +63,15 @@ func SecondDisplay(second int) string {
 	return display
 }
 
-func CurrentDatetime(file bool) string {
+func CurrentDatetime(needType string) string {
 	var currentDisplay string
 	current := time.Now()
-	if file {
+	switch needType {
+	case "file":
 		currentDisplay = current.Format("20060102_150405")
-	} else {
+	case "dir":
+		currentDisplay = current.Format("2006010215044")
+	default:
 		currentDisplay = current.Format("2006-01-02 15:04:05")
 	}
 	return currentDisplay
@@ -101,7 +104,7 @@ func GetOutputDir() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	outputDir := path.Join(current, "output")
+	outputDir := path.Join(current, "output", CurrentDatetime("dir"))
 	if file, err := os.Stat(outputDir); err != nil || !file.IsDir() {
 		if err = os.Mkdir(outputDir, 0700); err != nil {
 			return "", err

@@ -46,7 +46,7 @@ func (r *ResultSummary) SetGlobalInfo(opts *Options) {
 		r.GlobalInfo.JMSVersion = common.Empty
 	}
 
-	r.GlobalInfo.InspectDatetime = common.CurrentDatetime(false)
+	r.GlobalInfo.InspectDatetime = common.CurrentDatetime("time")
 	r.GlobalInfo.Machines = opts.MachineSet
 	for _, m := range opts.MachineSet {
 		switch m.Type {
