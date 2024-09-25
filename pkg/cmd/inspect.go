@@ -24,7 +24,7 @@ func main() {
 	)
 	flag.StringVar(
 		&opts.MachineInfoPath, "mt", opts.MachineInfoPath,
-		"待巡检机器配置文件路径(查看脚本压缩包内 demo.csv 文件)",
+		"待巡检机器配置文件路径(查看脚本压缩包内 machine-demo.csv 文件)",
 	)
 	flag.StringVar(
 		&opts.ExcludeTask, "et", opts.ExcludeTask,
