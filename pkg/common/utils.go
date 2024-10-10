@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"strconv"
 	"strings"
@@ -111,4 +112,22 @@ func GetOutputDir() (string, error) {
 		}
 	}
 	return outputDir, nil
+}
+
+func GetTerminalWidth() (int, error) {
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+	parts := strings.Fields(string(output))
+	if len(parts) < 2 {
+		return 0, fmt.Errorf("无法获取终端宽度")
+	}
+	width, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, err
+	}
+	return width, nil
 }

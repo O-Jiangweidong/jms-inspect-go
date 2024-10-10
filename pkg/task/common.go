@@ -4,17 +4,15 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
-	"syscall"
-
-	"inspect/pkg/common"
-
 	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/liushuochen/gotable"
 	"golang.org/x/crypto/ssh/terminal"
+	"inspect/pkg/common"
+	"os"
+	"os/exec"
+	"strings"
+	"syscall"
 )
 
 type GlobalInfo struct {
@@ -36,7 +34,7 @@ type ResultSummary struct {
 	DBResult        map[string]interface{}
 
 	// Other
-	EchartsData string
+	EchartsData string `json:"-"`
 }
 
 func (r *ResultSummary) SetGlobalInfo(opts *Options) {
@@ -134,13 +132,15 @@ func (o *Options) CheckMySQL() error {
 	if !o.EnableMySQL {
 		return nil
 	}
-	o.Logger.Debug("正在根据 JC 配置文件，检查 JumpServer MySQL 是否可连接...")
+	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer config) 配置文件，检查 JumpServer MySQL 是否可连接...")
 	db, err := o.GetMySQLClient()
 	if err != nil {
+		o.Logger.MsgOneLine(common.NoType, "")
 		return err
 	}
 	o.MySQLClient = db
 	if err = db.Ping(); err != nil {
+		o.Logger.MsgOneLine(common.NoType, "")
 		return fmt.Errorf("连接 JumpServer MySQL 失败: %v", err)
 	}
 	return nil
@@ -173,7 +173,7 @@ func (o *Options) GetSentinelRedisClient() *redis.Client {
 		}
 		return redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", masterInfo["ip"], masterInfo["port"]),
-			Password: "Calong@2013",
+			Password: o.JMSConfig["REDIS_PASSWORD"],
 		})
 	}
 	return nil
@@ -211,15 +211,17 @@ func (o *Options) CheckRedis() error {
 	if !o.EnableRedis {
 		return nil
 	}
-	o.Logger.Debug("正在根据 JC 配置文件，检查 JumpServer Redis 是否可连接...")
+	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer config) 配置文件，检查 JumpServer Redis 是否可连接...")
 	rdb := o.GetRedisClient()
 	o.RedisClient = rdb
 	defer func(rdb *redis.Client) {
 		_ = rdb.Close()
 	}(rdb)
 	if _, err := rdb.Ping().Result(); err != nil {
+		o.Logger.MsgOneLine(common.NoType, "")
 		return fmt.Errorf("连接 JumpServer Redis 失败: %v", err)
 	}
+	o.Logger.MsgOneLine(common.Success, "数据库连接测试成功\n\n")
 	return nil
 }
 
@@ -333,7 +335,7 @@ func (o *Options) CheckMachine() error {
 		} else {
 			machineNameSet[name] = true
 		}
-		o.Logger.MsgOneLine("\t%v: 正在检查机器 %s([%s]) 是否可连接...", index, machine.Name, machine.Host)
+		o.Logger.MsgOneLine(common.NoType, "\t%v: 正在检查机器 %s([%s]) 是否可连接...", index, machine.Name, machine.Host)
 		if err = machine.Connect(); err == nil {
 			machine.Valid = true
 			o.MachineSet = append(o.MachineSet, machine)
@@ -347,7 +349,7 @@ func (o *Options) CheckMachine() error {
 			name, type_, host, port, username, privilegeType, valid,
 		})
 	}
-
+	o.Logger.MsgOneLine(common.Success, "机器检查完成，具体如下：")
 	if len(o.MachineSet) == 0 {
 		fmt.Printf("\n%s\n", table)
 		return fmt.Errorf("没有获取到有效的机器信息，请检查此文件内容: %s", o.MachineInfoPath)

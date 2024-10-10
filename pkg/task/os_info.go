@@ -96,7 +96,7 @@ func (t *OsInfoTask) GetCPUInfo() {
 		t.result["CpuNum"] = common.Empty
 	}
 	// 每物理核心数
-	physicalCmd := `cat /proc/cpuinfo | grep "cpu cores" | uniq`
+	physicalCmd := `lscpu | grep '^Core(s) per socket:' | awk '{print $4}'`
 	if result, err := t.Machine.DoCommand(physicalCmd); err == nil {
 		t.result["CpuPhysicalCores"] = result
 	} else {

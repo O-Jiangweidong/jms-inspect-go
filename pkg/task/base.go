@@ -17,9 +17,9 @@ type Machine struct {
 	Host     string
 	Port     string
 	Username string
-	Password string
+	Password string `json:"-"`
 	PriType  string
-	PriPwd   string
+	PriPwd   string `json:"-"`
 	Valid    bool
 
 	Client *ssh.Client `json:"-"`
@@ -138,13 +138,13 @@ type Executor struct {
 }
 
 func (e *Executor) Execute(opts *Options) (map[string]interface{}, []AbnormalMsg) {
-	e.Logger.Info("开始执行机器名为[%s]的任务，共%v个", e.Machine.Name, len(e.Tasks))
+	e.Logger.Info("开始执行机器名为 [%s] 的任务，共%v个", e.Machine.Name, len(e.Tasks))
 	e.Result = make(map[string]interface{})
 	for _, t := range e.Tasks {
 		e.MergeResult(DoTask(t, opts))
 	}
 	e.Machine.Down()
-	e.Logger.Info("机器名为[%s]的任务全部执行结束\n", e.Machine.Name)
+	e.Logger.Info("机器名为 [%s] 的任务全部执行结束\n", e.Machine.Name)
 	return e.Result, e.AbnormalResult
 }
 

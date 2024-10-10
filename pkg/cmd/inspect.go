@@ -3,13 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	_ "github.com/go-sql-driver/mysql"
-
 	"inspect/pkg/common"
 	"inspect/pkg/report"
 	"inspect/pkg/task"
+	"os"
 )
 
 const DefaultJMSConfigPath = "/opt/jumpserver/config/config.txt"
@@ -18,14 +16,14 @@ const version = "v0.0.3"
 var logger *common.Logger
 
 func main() {
-	logger = common.NewLogger()
+	logger = common.GetLogger()
 	opts := task.Options{Logger: logger}
 	defer opts.Clear()
 
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(os.Stderr, "JumpServer 巡检脚本工具, %s\n", version)
-		_, _ = fmt.Fprintf(os.Stderr, "该工具用于自动化检查系统中各个组件的状态，包括网络连接、服务运行情况等。通过此工具，您可以快速识别潜在问题，提高系统维护效率。\n\n")
-		_, _ = fmt.Fprintf(os.Stderr, "使用方法:\n\t jms_inspect[exe] -参数选项 参数值\n")
+		_, _ = fmt.Fprintf(os.Stderr, "该工具用于自动化检查系统中各个组件的状态，包括网络连接、服务运行情况等。通过此工具，您可以快速识别潜在问题，提高系统维护效率。\n")
+		_, _ = fmt.Fprintf(os.Stderr, "[使用方法]\n jms_inspect[exe] -参数选项 参数值\n")
 		flag.PrintDefaults()
 	}
 	flag.StringVar(
@@ -79,6 +77,10 @@ func main() {
 	hr := report.HtmlReport{Summary: &resultSummary}
 	if err := hr.Generate(); err != nil {
 		logger.Error("生成 HTML 格式报告错误: %s", err)
+	}
+	jr := report.JsonReport{Summary: &resultSummary}
+	if err := jr.Generate(); err != nil {
+		logger.Error("生成 Json 格式报告错误: %s", err)
 	}
 	logger.Info("巡检完成，请将此路径下的巡检文件发送给技术工程师: \n\t%s", hr.ReportDir)
 }

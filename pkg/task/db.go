@@ -45,7 +45,7 @@ func (t *DBTask) Init(opts *Options) error {
 
 func (t *DBTask) Get(key string) string {
 	if v, exist := t.redisInfo[key]; exist {
-		return v
+		return strings.TrimSpace(v)
 	} else {
 		return common.Empty
 	}
