@@ -82,5 +82,5 @@ func main() {
 	if err := jr.Generate(); err != nil {
 		logger.Error("生成 Json 格式报告错误: %s", err)
 	}
-	logger.Info("巡检完成，请将此路径下的巡检文件发送给技术工程师: \n\t%s", hr.ReportDir)
+	logger.Finished("巡检完成，请将此路径下的巡检文件发送给技术工程师: \n%s", hr.ReportDir)
 }

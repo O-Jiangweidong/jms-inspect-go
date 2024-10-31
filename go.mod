@@ -13,5 +13,5 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.31.1 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 )

@@ -14,6 +14,7 @@ const (
 	Warning
 	Success
 	Error
+	Finished
 	Period
 	StopMsg
 	NoType
@@ -155,6 +156,10 @@ func (l *Logger) Warning(format string, a ...any) {
 
 func (l *Logger) Error(format string, a ...any) {
 	l.PushMsg(l.format(Error, true, format, a...))
+}
+
+func (l *Logger) Finished(format string, a ...any) {
+	fmt.Println(fmt.Sprintf(format, a...))
 }
 
 func newLogger() *Logger {

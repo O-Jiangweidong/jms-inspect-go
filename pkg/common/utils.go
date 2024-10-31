@@ -107,7 +107,7 @@ func GetOutputDir() (string, error) {
 	}
 	outputDir := path.Join(current, "output", CurrentDatetime("dir"))
 	if file, err := os.Stat(outputDir); err != nil || !file.IsDir() {
-		if err = os.Mkdir(outputDir, 0700); err != nil {
+		if err = os.MkdirAll(outputDir, 0700); err != nil {
 			return "", err
 		}
 	}

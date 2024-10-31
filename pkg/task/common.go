@@ -11,6 +11,7 @@ import (
 	"inspect/pkg/common"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"syscall"
 )
@@ -111,15 +112,44 @@ func (o *Options) CheckJMSConfig() error {
 	return nil
 }
 
-func (o *Options) GetMySQLClient() (*sql.DB, error) {
-	host := o.JMSConfig["DB_HOST"]
-	if host == "mysql" {
-		cmd := exec.Command("docker", "inspect", "-f", "'{{.NetworkSettings.Networks.jms_net.IPAddress}}'", "jms_mysql")
-		if ret, err := cmd.CombinedOutput(); err == nil {
-			host = strings.Replace(string(ret), "'", "", -1)
-			host = strings.TrimSpace(host)
+func (o *Options) FindCoreAuth() (string, string) {
+	for _, m := range o.MachineSet {
+		if m.Type == common.JumpServer && m.PriType != "" && m.PriPwd != "" {
+			return m.PriType, m.PriPwd
 		}
 	}
+	return "", ""
+}
+
+func (o *Options) GetHostFromDocker(host string) string {
+	var finCommand string
+	container := ""
+	if host == "mysql" {
+		container = "jms_mysql"
+	} else if host == "redis" {
+		container = "jms_redis"
+	}
+	if container != "" {
+		baseCommand := fmt.Sprintf("docker inspect -f '{{.NetworkSettings.Networks.jms_net.IPAddress}}' %s", container)
+		if priType, priPwd := o.FindCoreAuth(); priType != "" && priPwd != "" {
+			finCommand = fmt.Sprintf("echo %s | %s -c '%s' root", priPwd, priType, baseCommand)
+		} else {
+			finCommand = baseCommand
+		}
+		cmd := exec.Command("sh", "-c", finCommand)
+		if ret, err := cmd.CombinedOutput(); err == nil {
+			ipv4Regex := regexp.MustCompile(`([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})`)
+			matches := ipv4Regex.FindStringSubmatch(string(ret))
+			if len(matches) > 1 {
+				host = matches[1]
+			}
+		}
+	}
+	return host
+}
+
+func (o *Options) GetMySQLClient() (*sql.DB, error) {
+	host := o.GetHostFromDocker(o.JMSConfig["DB_HOST"])
 	port := o.JMSConfig["DB_PORT"]
 	database := o.JMSConfig["DB_NAME"]
 	username := o.JMSConfig["DB_USER"]
@@ -180,16 +210,7 @@ func (o *Options) GetSentinelRedisClient() *redis.Client {
 }
 
 func (o *Options) GetSingleRedis(host, port, password string) *redis.Client {
-	if host == "redis" {
-		cmd := exec.Command(
-			"docker", "inspect", "-f",
-			"'{{.NetworkSettings.Networks.jms_net.IPAddress}}'", "jms_redis",
-		)
-		if ret, err := cmd.CombinedOutput(); err == nil {
-			host = strings.Replace(string(ret), "'", "", -1)
-			host = strings.TrimSpace(host)
-		}
-	}
+	host = o.GetHostFromDocker(host)
 	return redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: password,
