@@ -14,7 +14,6 @@ const (
 	Warning
 	Success
 	Error
-	Finished
 	Period
 	StopMsg
 	NoType
