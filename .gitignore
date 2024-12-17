@@ -3,5 +3,6 @@ output/
 .idea/
 .DS_Store
 test*
-config/
+config/*
+!config/machine-demo.csv
 release/
