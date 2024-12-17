@@ -45,6 +45,7 @@ func (m *Machine) Connect() error {
 }
 
 func (m *Machine) DoCommand(cmd string) (string, error) {
+	cmd = fmt.Sprintf("timeout 5s %s", cmd)
 	session, err := m.Client.NewSession()
 	if err != nil {
 		return "", err
@@ -61,8 +62,8 @@ func (m *Machine) DoCommand(cmd string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		cmd := strings.ReplaceAll(cmd, "'", "'\\''")
-		if err := session.Start(fmt.Sprintf("%s -c '%s'", m.PriType, cmd)); err != nil {
+		cmd = strings.ReplaceAll(cmd, "'", "'\\''")
+		if err = session.Start(fmt.Sprintf("%s -c '%s'", m.PriType, cmd)); err != nil {
 			return "", err
 		}
 
