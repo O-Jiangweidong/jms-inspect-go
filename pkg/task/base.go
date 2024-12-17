@@ -172,8 +172,8 @@ func (t *Task) GetConfig(key, input string) string {
 func (t *Task) SetAbnormalEvent(desc, level string) {
 	displayMap := make(map[string]string)
 	displayMap[common.Critical] = "严重"
-	displayMap[common.NORMAL] = "一般"
-	displayMap[common.SLIGHT] = "轻微"
+	displayMap[common.Normal] = "一般"
+	displayMap[common.Slight] = "轻微"
 
 	t.abnormalResult = append(t.abnormalResult, AbnormalMsg{
 		Level: level, Desc: desc, LevelDisplay: displayMap[level],

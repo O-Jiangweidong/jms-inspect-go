@@ -269,7 +269,7 @@ func (t *OsInfoTask) GetZombieProcess() {
 		exist := common.BoolDisplay(result)
 		t.result["ExistZombie"] = exist
 		if exist == common.Yes {
-			t.SetAbnormalEvent("节点下存在僵尸进程", common.NORMAL)
+			t.SetAbnormalEvent("节点下存在僵尸进程", common.Normal)
 		}
 	} else {
 		t.result["ExistZombie"] = common.Empty
