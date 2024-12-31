@@ -135,19 +135,28 @@ func (t *DBTask) GetDBInfo() error {
 	}
 	for rows.Next() {
 		columns, err := rows.Columns()
-		valuePointers := make([]interface{}, len(columns))
 		if err != nil {
 			return err
+		}
+		valuePointers := make([]interface{}, len(columns))
+		for i := range valuePointers {
+			var value interface{}
+			valuePointers[i] = &value
 		}
 		if err = rows.Scan(valuePointers...); err != nil {
 			continue
 		}
 		for i, name := range columns {
+			value := *(valuePointers[i].(*interface{}))
+			switch v := value.(type) {
+			case []byte:
+				value = string(v)
+			}
 			switch name {
 			case "Slave_SQL_Running":
-				dbSlaveSqlRunning = fmt.Sprintf("%v", valuePointers[i])
+				dbSlaveSqlRunning = fmt.Sprintf("%v", value)
 			case "Slave_IO_Running":
-				dbSlaveIORunning = fmt.Sprintf("%v", valuePointers[i])
+				dbSlaveIORunning = fmt.Sprintf("%v", value)
 			}
 		}
 	}

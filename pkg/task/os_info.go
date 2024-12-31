@@ -200,7 +200,7 @@ func (t *OsInfoTask) GetSystemParams() {
 		t.result["SelinuxEnable"] = common.Empty
 	}
 	// 防火墙是否开启
-	firewalldCmd := `(ufw status 2>/dev/null | grep -qw "Status: active" || systemctl is-active --quiet firewalld) && echo 1 || echo 0`
+	firewalldCmd := `\(ufw status 2>/dev/null | grep -qw "Status: active" || systemctl is-active --quiet firewalld\) && echo 1 || echo 0`
 	if result, err := t.Machine.DoCommand(firewalldCmd); err == nil {
 		enable := common.BoolDisplay(result)
 		t.result["FirewallEnable"] = enable
