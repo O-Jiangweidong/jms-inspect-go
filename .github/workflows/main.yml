@@ -23,6 +23,22 @@ jobs:
       - name: Execute build script
         run: chmod +x ./build.sh && ./build.sh
 
+      - name: Get previous release tag
+        id: get_previous_release
+        run: |
+          PREV_TAG=$(git tag --sort=-v:refname | sed -n '2p')
+          echo "Previous release tag: $PREV_TAG"
+          echo "::set-output name=prev_tag::$PREV_TAG"
+
+      - name: Generate release notes
+        id: changelog
+        run: |
+          CURRENT_TAG=${{ github.event.release.tag_name }}
+          echo "Current release tag: $CURRENT_TAG"
+          commits=$(git log --format=format:"* %s" ${{ steps.get_previous_release.outputs.prev_tag }}..${CURRENT_TAG})
+          echo "${commits}" > release_notes.txt
+          echo "::set-output name=notes::$(cat release_notes.txt)"
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         with:
