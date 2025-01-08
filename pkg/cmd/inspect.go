@@ -11,7 +11,7 @@ import (
 )
 
 const DefaultJMSConfigPath = "/opt/jumpserver/config/config.txt"
-const version = "v0.0.3"
+const version = "dev"
 
 var logger *common.Logger
 

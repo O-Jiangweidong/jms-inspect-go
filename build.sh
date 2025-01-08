@@ -31,6 +31,10 @@ build() {
   config_file="config/machine-demo.csv"
   release_dir="release"
   mkdir -p "$release_dir"
+  # Version
+  if [ -n "$VERSION" ]; then
+    sed -i '' "s/const version = \"dev\"/const version = \"$VERSION\"/" "pkg/cmd/inspect.go"
+  fi
   # Mac
   build_and_zip "darwin" "jms_inspect"
   # Linux
@@ -39,4 +43,4 @@ build() {
   build_and_zip "windows" "jms_inspect.exe"
 }
 
-build
+build "$@"
