@@ -28,7 +28,7 @@ jobs:
         run: |
           PREV_TAG=$(git tag --sort=-v:refname | sed -n '2p')
           echo "Previous release tag: $PREV_TAG"
-          echo "::set-output name=prev_tag::$PREV_TAG"
+          echo "{prev_tag}={$PREV_TAG}" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
         id: changelog
@@ -38,6 +38,7 @@ jobs:
           commits=$(git log --format=format:"* %s" ${{ steps.get_previous_release.outputs.prev_tag }}..${CURRENT_TAG})
           echo "${commits}" > release_notes.txt
           echo "::set-output name=notes::$(cat release_notes.txt)"
+          echo "{notes}={$(cat release_notes.txt)}" >> $GITHUB_OUTPUT
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
