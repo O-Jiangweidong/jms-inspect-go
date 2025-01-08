@@ -82,5 +82,9 @@ func main() {
 	if err := jr.Generate(); err != nil {
 		logger.Error("生成 Json 格式报告错误: %s", err)
 	}
+	er := report.ExcelReport{Summary: &resultSummary}
+	if err := er.Generate(); err != nil {
+		logger.Error("生成 Excel 格式报告错误: %s", err)
+	}
 	logger.Finished("巡检完成，请将此路径下的巡检文件发送给技术工程师: \n%s", hr.ReportDir)
 }
