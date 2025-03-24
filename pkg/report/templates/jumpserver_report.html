@@ -718,65 +718,28 @@
                 <table class="v-table">
                     <caption>JumpServer服务占用磁盘情况如下表：</caption>
                     <tr>
-                        <th>录像目录地址</th>
+                        <th>录像存储路径</th>
                         <td>{{ $m.ReplayPath }}</td>
                     </tr>
                     <tr>
-                        <th>录像目录总大小</th>
+                        <th>录像空间总大小</th>
                         <td>{{ $m.ReplayTotal }}</td>
                     </tr>
                     <tr>
-                        <th>录像目录已使用</th>
+                        <th>录像存储已使用</th>
                         <td>{{ $m.ReplayUsed }}</td>
                     </tr>
                     <tr>
-                        <th>录像目录空闲大小</th>
+                        <th>录像存储空闲</th>
                         <td>{{ $m.ReplayUnused }}</td>
                     </tr>
+
+                    {{ range $m.ComponentLogSize }}
                     <tr>
-                        <th>Nginx 组件日志总大小</th>
-                        <td>{{ $m.nginxLogSize }}</td>
+                        <th>{{ .ServiceName }}</th>
+                        <td>{{ .ServiceLogSize }}</td>
                     </tr>
-                    <tr>
-                        <th>Core 组件日志总大小</th>
-                        <td>{{ $m.coreLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Koko 组件日志总大小</th>
-                        <td>{{ $m.kokoLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lion 组件日志总大小</th>
-                        <td>{{ $m.lionLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Chen 组件日志总大小</th>
-                        <td>{{ $m.chenLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Kael 组件日志总大小</th>
-                        <td>{{ $m.kaelLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Magnus 组件日志总大小</th>
-                        <td>{{ $m.magnusLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Panda 组件日志总大小</th>
-                        <td>{{ $m.pandaLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Razor 组件日志总大小</th>
-                        <td>{{ $m.razorLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>Video 组件日志总大小</th>
-                        <td>{{ $m.videoLogSize }}</td>
-                    </tr>
-                    <tr>
-                        <th>XRdp 组件日志总大小</th>
-                        <td>{{ $m.xrdpLogSize }}</td>
-                    </tr>
+                    {{ end }}
                 </table>
             </div>
         </div>
