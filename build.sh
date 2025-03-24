@@ -34,7 +34,11 @@ build() {
   mkdir -p "$release_dir"
   # Version
   if [ -n "$VERSION" ]; then
-    sed -i '' "s/const version = \"dev\"/const version = \"$VERSION\"/" "pkg/cmd/inspect.go"
+    if [[ $(uname) == "Darwin" ]]; then
+      sed -i '' "s/const version = \"dev\"/const version = \"$VERSION\"/" "pkg/cmd/inspect.go"
+    else
+      sed -i "s/const version = \"dev\"/const version = \"$VERSION\"/" "pkg/cmd/inspect.go"
+    fi
   fi
   # Mac
   build_and_zip "darwin" "jms_inspect"

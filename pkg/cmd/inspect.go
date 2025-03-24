@@ -21,7 +21,7 @@ func main() {
 	defer opts.Clear()
 
 	flag.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr, "JumpServer 巡检脚本工具, %s\n", version)
+		_, _ = fmt.Fprintf(os.Stderr, "JumpServer 巡检脚本工具, 版本: %s\n", version)
 		_, _ = fmt.Fprintf(os.Stderr, "该工具用于自动化检查系统中各个组件的状态，包括网络连接、服务运行情况等。通过此工具，您可以快速识别潜在问题，提高系统维护效率。\n")
 		_, _ = fmt.Fprintf(os.Stderr, "[使用方法]\n jms_inspect[exe] -参数选项 参数值\n")
 		flag.PrintDefaults()
