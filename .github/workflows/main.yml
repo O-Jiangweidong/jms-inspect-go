@@ -28,15 +28,15 @@ jobs:
       - name: Get previous release tag
         id: get_previous_release
         run: |
-          PREV_TAG=$(git tag --sort=-v:refname | sed -n '2p')
+          PREV_TAG=$(git tag --sort=-v:refname | sed -n '1p')
           echo "Previous release tag: $PREV_TAG"
-          echo "prev_tag={$PREV_TAG}" >> $GITHUB_OUTPUT
+          echo "{prev_tag}={$PREV_TAG}" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
         id: changelog
         run: |
-          echo "Current release tag: $CURRENT_TAG"
           CURRENT_TAG=${{ github.event.release.tag_name }}
+          echo "Current release tag: $CURRENT_TAG"
           COMMITS=$(git log --pretty=format:"* %s (%h)" ${{ steps.get_previous_release.outputs.prev_tag }}..${CURRENT_TAG})
           echo "### Commits from ${PREV_TAG} to ${CURRENT_TAG}" > release_notes.md
           echo "$COMMITS" >> release_notes.md
