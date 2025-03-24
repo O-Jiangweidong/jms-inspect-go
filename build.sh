@@ -15,7 +15,7 @@ build_and_zip() {
         exit 1
     fi
 
-    zip -r "${zip_file}" "${output_binary}" "${config_file}"
+    zip -r "${zip_file}" "${output_binary}" "${config1_file}" "${config2_file}"
 
     if [ $? -eq 0 ]; then
         mv "${zip_file}" "$release_dir/"
@@ -28,7 +28,8 @@ build_and_zip() {
 }
 
 build() {
-  config_file="config/machine-demo.csv"
+  config1_file="config/machine-demo.csv"
+  config2_file="config/machine-demo.yml"
   release_dir="release"
   mkdir -p "$release_dir"
   # Version

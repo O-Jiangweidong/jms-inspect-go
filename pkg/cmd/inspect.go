@@ -31,7 +31,7 @@ func main() {
 	)
 	flag.StringVar(
 		&opts.MachineInfoPath, "mt", opts.MachineInfoPath,
-		"待巡检机器配置文件路径(查看脚本压缩包内 machine-demo.csv 文件)",
+		"待巡检机器配置文件路径(查看脚本压缩包内 machine-demo.csv/yml 文件)",
 	)
 	flag.StringVar(
 		&opts.ExcludeTask, "et", opts.ExcludeTask,
@@ -47,6 +47,7 @@ func main() {
 	var resultSummary task.ResultSummary
 	var result map[string]interface{}
 	var abnormalResult []task.AbnormalMsg
+	logger.MsgOneLine(common.NoType, "")
 	logger.Info("巡检任务开始")
 	// 设置全局信息
 	resultSummary.SetGlobalInfo(&opts)

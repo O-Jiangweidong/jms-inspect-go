@@ -1,2 +1,3 @@
 ﻿name,type,host,port,username,password,privilege_type,privilege_password
-测试堡垒机,JumpServer,192.168.11.1,22,root,123456,su -,root_password
+测试堡垒机环境,JumpServer,192.168.11.1,22,root,123456,,
+生产堡垒机环境,JumpServer,192.168.11.1,22,proc,,su -,

@@ -79,7 +79,7 @@ func (l *Logger) pushSpinnerMsg(msg string) {
 			logMsg := l.format(Period, false, content)
 			logMsg.IsFather = i == 0
 			l.PushMsg(logMsg)
-			time.Sleep(100 * time.Millisecond) // 减少sleep的时间，提高响应速度
+			time.Sleep(200 * time.Millisecond) // 减少sleep的时间，提高响应速度
 			i++
 		}
 	}

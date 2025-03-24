@@ -3,6 +3,7 @@ package task
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -12,23 +13,38 @@ import (
 )
 
 type Machine struct {
-	Name     string
-	Type     string
-	Host     string
-	Port     string
-	Username string
-	Password string `json:"-"`
-	PriType  string
-	PriPwd   string `json:"-"`
-	Valid    bool
+	Name       string `yaml:"name" json:"name"`
+	Type       string `yaml:"type" json:"type"`
+	Host       string `yaml:"host" json:"host"`
+	Port       string `yaml:"port" json:"port"`
+	Username   string `yaml:"username" json:"username"`
+	Password   string `yaml:"password" json:"-"`
+	SSHKeyPath string `yaml:"ssh_key_path" json:"-"`
+	PriType    string `yaml:"privilege_type" json:"privilege_type"`
+	PriPwd     string `yaml:"privilege_password" json:"-"`
+	Valid      bool   `yaml:"valid" json:"valid"`
 
-	Client *ssh.Client `json:"-"`
+	Client *ssh.Client `yaml:"-" json:"-"`
 }
 
 func (m *Machine) Connect() error {
+	auth := []ssh.AuthMethod{
+		ssh.Password(m.Password),
+	}
+	if m.SSHKeyPath != "" {
+		key, err := os.ReadFile(m.SSHKeyPath)
+		if err != nil {
+			return fmt.Errorf("密钥文件读取失败: %w", err)
+		}
+		signer, err := ssh.ParsePrivateKey(key)
+		if err != nil {
+			return fmt.Errorf("密钥文件解析失败: %w", err)
+		}
+		auth = append(auth, ssh.PublicKeys(signer))
+	}
 	sshConfig := &ssh.ClientConfig{
 		User:            m.Username,
-		Auth:            []ssh.AuthMethod{ssh.Password(m.Password)},
+		Auth:            auth,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         10 * time.Second,
 	}
@@ -37,15 +53,15 @@ func (m *Machine) Connect() error {
 		return err
 	} else {
 		m.Client = client
-		if _, err = m.DoCommand("whoami"); err != nil {
+		command := Command{content: "whoami", timeout: 5}
+		if _, err = m.DoCommand(command); err != nil {
 			return err
 		}
 		return nil
 	}
 }
 
-func (m *Machine) DoCommand(cmd string) (string, error) {
-	cmd = fmt.Sprintf("timeout 5s %s", cmd)
+func (m *Machine) DoCommand(command Command) (string, error) {
 	session, err := m.Client.NewSession()
 	if err != nil {
 		return "", err
@@ -62,7 +78,7 @@ func (m *Machine) DoCommand(cmd string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		cmd = strings.ReplaceAll(cmd, "'", "'\\''")
+		cmd := strings.ReplaceAll(command.Value(), "'", "'\\''")
 		if err = session.Start(fmt.Sprintf("%s -c '%s'", m.PriType, cmd)); err != nil {
 			return "", err
 		}
@@ -77,7 +93,7 @@ func (m *Machine) DoCommand(cmd string) (string, error) {
 		}
 		rest = stdoutBuf.Bytes()
 	} else {
-		rest, err = session.CombinedOutput(cmd)
+		rest, err = session.CombinedOutput(command.Value())
 		if err != nil {
 			return "", err
 		}

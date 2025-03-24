@@ -8,13 +8,43 @@ import (
 	"strings"
 )
 
+const FirewalldScript = `#!/bin/bash
+check_firewalld() {
+    if systemctl is-active --quiet firewalld; then
+        echo "1" && exit 0
+    fi
+}
+
+check_ufw() {
+    if ufw status | grep -q "Status: active"; then
+        echo "1" && exit 0
+    fi
+}
+
+check_iptables() {
+    if systemctl is-active --quiet iptables; then
+        echo "1" && exit 0
+    fi
+}
+
+if check_firewalld; then
+    :
+elif check_ufw; then
+    :
+elif check_iptables; then
+    :
+else
+    echo "0"
+fi`
+
 type OsInfoTask struct {
 	Task
 	Machine *Machine
 }
 
 func (t *OsInfoTask) GetHostname() {
-	if result, err := t.Machine.DoCommand("hostname"); err == nil {
+	cmd := Command{content: "hostname", timeout: 5}
+	if result, err := t.Machine.DoCommand(cmd); err == nil {
 		t.result["MachineHostname"] = result
 	} else {
 		t.result["MachineHostname"] = common.Empty
@@ -22,7 +52,8 @@ func (t *OsInfoTask) GetHostname() {
 }
 
 func (t *OsInfoTask) GetLanguage() {
-	if result, err := t.Machine.DoCommand("echo $LANG"); err == nil {
+	command := Command{content: "echo $LANG", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["MachineLanguage"] = result
 	} else {
 		t.result["MachineLanguage"] = common.Empty
@@ -30,7 +61,8 @@ func (t *OsInfoTask) GetLanguage() {
 }
 
 func (t *OsInfoTask) GetAllIps() {
-	if result, err := t.Machine.DoCommand("hostname -I"); err == nil {
+	command := Command{content: "hostname -I", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["MachineAddress"] = result
 	} else {
 		t.result["MachineAddress"] = common.Empty
@@ -38,7 +70,8 @@ func (t *OsInfoTask) GetAllIps() {
 }
 
 func (t *OsInfoTask) GetOsVersion() {
-	if result, err := t.Machine.DoCommand("uname -o"); err == nil {
+	command := Command{content: "uname -o", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["OsVersion"] = result
 	} else {
 		t.result["OsVersion"] = common.Empty
@@ -46,7 +79,8 @@ func (t *OsInfoTask) GetOsVersion() {
 }
 
 func (t *OsInfoTask) GetKernelVersion() {
-	if result, err := t.Machine.DoCommand("uname -r"); err == nil {
+	command := Command{content: "uname -r", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["KernelVersion"] = result
 	} else {
 		t.result["KernelVersion"] = common.Empty
@@ -54,7 +88,8 @@ func (t *OsInfoTask) GetKernelVersion() {
 }
 
 func (t *OsInfoTask) GetCpuArch() {
-	if result, err := t.Machine.DoCommand("uname -m"); err == nil {
+	command := Command{content: "uname -m", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["CpuArch"] = result
 	} else {
 		t.result["CpuArch"] = common.Empty
@@ -62,7 +97,8 @@ func (t *OsInfoTask) GetCpuArch() {
 }
 
 func (t *OsInfoTask) GetCurrentDatetime() {
-	if result, err := t.Machine.DoCommand("date +'%F %T'"); err == nil {
+	command := Command{content: "date +'%F %T'", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["CurrentTime"] = result
 	} else {
 		t.result["CurrentTime"] = common.Empty
@@ -70,7 +106,8 @@ func (t *OsInfoTask) GetCurrentDatetime() {
 }
 
 func (t *OsInfoTask) GetLastUpTime() {
-	if result, err := t.Machine.DoCommand("who -b | awk '{print $2,$3,$4}'"); err == nil {
+	command := Command{content: "who -b | awk '{print $2,$3,$4}'", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["LastUpTime"] = result
 	} else {
 		t.result["LastUpTime"] = common.Empty
@@ -78,7 +115,8 @@ func (t *OsInfoTask) GetLastUpTime() {
 }
 
 func (t *OsInfoTask) GetOperatingTime() {
-	if result, err := t.Machine.DoCommand("cat /proc/uptime | awk '{print $1}'"); err == nil {
+	command := Command{content: "cat /proc/uptime | awk '{print $1}'", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		if seconds, err := strconv.Atoi(strings.Split(result, ".")[0]); err == nil {
 			t.result["OperatingTime"] = common.SecondDisplay(seconds)
 			return
@@ -90,28 +128,34 @@ func (t *OsInfoTask) GetOperatingTime() {
 func (t *OsInfoTask) GetCPUInfo() {
 	// CPU 数
 	coreNumCmd := `cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l`
-	if result, err := t.Machine.DoCommand(coreNumCmd); err == nil {
+	command := Command{content: coreNumCmd, timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["CpuNum"] = result
 	} else {
 		t.result["CpuNum"] = common.Empty
 	}
 	// 每物理核心数
 	physicalCmd := `lscpu | grep '^Core(s) per socket:' | awk '{print $4}'`
-	if result, err := t.Machine.DoCommand(physicalCmd); err == nil {
+	command = Command{content: physicalCmd, timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["CpuPhysicalCores"] = result
 	} else {
 		t.result["CpuPhysicalCores"] = common.Empty
 	}
 	// 逻辑核数
-	logicalCmd := `cat /proc/cpuinfo | grep "processor" | wc -l`
-	if result, err := t.Machine.DoCommand(logicalCmd); err == nil {
+	command = Command{
+		content: `cat /proc/cpuinfo | grep "processor" | wc -l`, timeout: 5,
+	}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["CpuLogicalCores"] = result
 	} else {
 		t.result["CpuLogicalCores"] = common.Empty
 	}
 	// CPU 型号
-	cpuModelCmd := `cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq`
-	if result, err := t.Machine.DoCommand(cpuModelCmd); err == nil {
+	command = Command{
+		content: `cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq`, timeout: 5,
+	}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["CpuModel"] = result
 	} else {
 		t.result["CpuModel"] = common.Empty
@@ -120,8 +164,8 @@ func (t *OsInfoTask) GetCPUInfo() {
 
 func (t *OsInfoTask) GetMemoryInfo() {
 	// 物理内存信息
-	physicalCmd := `free -h|grep -i mem`
-	if result, err := t.Machine.DoCommand(physicalCmd); err == nil {
+	command := Command{content: `free -h|grep -i mem`, timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		var resultList []string
 		tempList := strings.Split(result, " ")
 		for _, item := range tempList[1:] {
@@ -138,8 +182,8 @@ func (t *OsInfoTask) GetMemoryInfo() {
 		t.result["MemoryAvailable"] = common.Empty
 	}
 	// 虚拟内存信息
-	virtualCmd := `free -h|grep -i swap`
-	if result, err := t.Machine.DoCommand(virtualCmd); err == nil {
+	command = Command{content: `free -h|grep -i swap`, timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		var resultList []string
 		tempList := strings.Split(result, " ")
 		for _, item := range tempList[1:] {
@@ -169,8 +213,9 @@ type DiskInfo struct {
 
 func (t *OsInfoTask) GetDiskInfo() {
 	logicalCmd := `df -hT -x tmpfs -x overlay -x devtmpfs| awk '{if (NR > 1 && $1!=tmpfs) {print $1,$2,$3,$4,$5,$6,$7}}'`
+	command := Command{content: logicalCmd, timeout: 5}
 	var diskInfoList []DiskInfo
-	if result, err := t.Machine.DoCommand(logicalCmd); err == nil {
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		for _, disk := range strings.Split(result, "\n") {
 			if disk == "" {
 				continue
@@ -194,14 +239,15 @@ func (t *OsInfoTask) GetDiskInfo() {
 
 func (t *OsInfoTask) GetSystemParams() {
 	// SELinux是否开启
-	if result, err := t.Machine.DoCommand("getenforce"); err == nil {
+	command := Command{content: "getenforce", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["SelinuxEnable"] = result
 	} else {
 		t.result["SelinuxEnable"] = common.Empty
 	}
 	// 防火墙是否开启
-	firewalldCmd := `\(ufw status 2>/dev/null | grep -qw "Status: active" || systemctl is-active --quiet firewalld\) && echo 1 || echo 0`
-	if result, err := t.Machine.DoCommand(firewalldCmd); err == nil {
+	command = Command{content: FirewalldScript, timeout: 0}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		enable := common.BoolDisplay(result)
 		t.result["FirewallEnable"] = enable
 		if enable == common.No {
@@ -212,13 +258,15 @@ func (t *OsInfoTask) GetSystemParams() {
 	}
 	// 是否开启 RSyslog
 	syslogCmd := `systemctl status rsyslog | grep active > /dev/null 2>&1;if [[ $? -eq 0 ]];then echo 1;else echo 0;fi`
-	if result, err := t.Machine.DoCommand(syslogCmd); err == nil {
+	command = Command{content: syslogCmd, timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["RsyslogEnable"] = common.BoolDisplay(result)
 	} else {
 		t.result["RsyslogEnable"] = common.Empty
 	}
 	// 是否存在定时任务
-	if result, err := t.Machine.DoCommand("ls /var/spool/cron/ |wc -l"); err == nil {
+	command = Command{content: "ls /var/spool/cron/ |wc -l", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		t.result["CrontabEnable"] = common.BoolDisplay(result)
 	} else {
 		t.result["CrontabEnable"] = common.Empty
@@ -256,7 +304,8 @@ func (t *OsInfoTask) GetPortTidyDisplay(result string) string {
 
 func (t *OsInfoTask) GetExposePort() {
 	ssCmd := `ss -tuln | grep LISTEN | awk '{print $5}' | awk -F: '{print $2$4}' | sort |uniq |tr '\n' ',' | sed 's/,$//'`
-	if result, err := t.Machine.DoCommand(ssCmd); err == nil {
+	command := Command{content: ssCmd, timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		ports := t.GetPortTidyDisplay(result)
 		t.result["ExposePort"] = ports
 	} else {
@@ -265,7 +314,8 @@ func (t *OsInfoTask) GetExposePort() {
 }
 
 func (t *OsInfoTask) GetZombieProcess() {
-	if result, err := t.Machine.DoCommand("ps -e -o ppid,stat | grep Z| wc -l"); err == nil {
+	command := Command{content: "ps -e -o ppid,stat | grep Z| wc -l", timeout: 5}
+	if result, err := t.Machine.DoCommand(command); err == nil {
 		exist := common.BoolDisplay(result)
 		t.result["ExistZombie"] = exist
 		if exist == common.Yes {

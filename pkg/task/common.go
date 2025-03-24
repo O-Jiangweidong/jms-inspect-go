@@ -4,17 +4,36 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"fmt"
-	"github.com/go-redis/redis"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/liushuochen/gotable"
-	"golang.org/x/crypto/ssh/terminal"
 	"inspect/pkg/common"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"syscall"
+
+	"github.com/go-redis/redis"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/liushuochen/gotable"
+	"golang.org/x/crypto/ssh/terminal"
+	"gopkg.in/yaml.v3"
 )
+
+const (
+	CSV = 0
+	YML = 1
+)
+
+type Command struct {
+	content string
+	timeout int
+}
+
+func (c *Command) Value() string {
+	if c.timeout != 0 {
+		return fmt.Sprintf("timeout %d %s", c.timeout, c.content)
+	}
+	return c.content
+}
 
 type GlobalInfo struct {
 	Machines        []Machine
@@ -101,11 +120,11 @@ func (o *Options) Transform() {
 
 func (o *Options) CheckJMSConfig() error {
 	if _, err := os.Stat(o.JMSConfigPath); err != nil {
-		return fmt.Errorf("请检查文件路径: [%s]，文件不存在。", o.JMSConfigPath)
+		return fmt.Errorf("请检查文件路径: %s，文件不存在。", o.JMSConfigPath)
 	}
 
 	if config, err := common.ConfigFileToMap(o.JMSConfigPath); err != nil {
-		return fmt.Errorf("请检查文件路径: [%s]，解析文件失败。", o.JMSConfigPath)
+		return fmt.Errorf("请检查文件路径: %s，解析文件失败。", o.JMSConfigPath)
 	} else {
 		o.JMSConfig = config
 	}
@@ -162,7 +181,7 @@ func (o *Options) CheckMySQL() error {
 	if !o.EnableMySQL {
 		return nil
 	}
-	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer config) 配置文件，检查 JumpServer MySQL 是否可连接...")
+	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer Config) 配置文件，检查 JumpServer MySQL 是否可连接...")
 	db, err := o.GetMySQLClient()
 	if err != nil {
 		o.Logger.MsgOneLine(common.NoType, "")
@@ -195,7 +214,7 @@ func (o *Options) GetSentinelRedisClient() *redis.Client {
 
 			masterInfo, err = sentinelClient.Master(sentinelInfo[0]).Result()
 			if err != nil {
-				fmt.Printf("哨兵[%s]连接失败: %s\n", host, err)
+				fmt.Printf("哨兵 %s 连接失败: %s\n", host, err)
 			}
 		}
 		if _, exist = masterInfo["ip"]; !exist {
@@ -232,7 +251,7 @@ func (o *Options) CheckRedis() error {
 	if !o.EnableRedis {
 		return nil
 	}
-	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer config) 配置文件，检查 JumpServer Redis 是否可连接...")
+	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer Config) 配置文件，检查 JumpServer Redis 是否可连接...")
 	rdb := o.GetRedisClient()
 	o.RedisClient = rdb
 	defer func(rdb *redis.Client) {
@@ -259,12 +278,11 @@ func (o *Options) CheckDB() error {
 func (o *Options) getPasswordFromUser(answer string) string {
 	var password string
 	for i := 1; i < 4; i++ {
-		o.Logger.Debug(answer)
+		o.Logger.MsgOneLine(common.NoType, answer)
 		if bytePassword, err := terminal.ReadPassword(int(syscall.Stdin)); err != nil {
 			o.Logger.Error("输入有误!")
 		} else {
 			password = string(bytePassword)
-			fmt.Println()
 			break
 		}
 	}
@@ -276,98 +294,121 @@ func (o *Options) CheckMachine() error {
 		return fmt.Errorf("待巡检机器文件路径不能为空")
 	}
 	if _, err := os.Stat(o.MachineInfoPath); err != nil {
-		return fmt.Errorf("请检查文件路径: [%s]，文件不存在", o.MachineInfoPath)
+		return fmt.Errorf("请检查文件路径: %s，文件不存在", o.MachineInfoPath)
 	}
 
-	file, err := os.Open(o.MachineInfoPath)
+	data, err := os.ReadFile(o.MachineInfoPath)
 	if err != nil {
-		return fmt.Errorf("请检查文件路径: [%s]，文件不存在", o.MachineInfoPath)
+		return fmt.Errorf("请检查文件路径: %s，文件不存在", o.MachineInfoPath)
 	}
-	defer func(file *os.File) {
-		_ = file.Close()
-	}(file)
 
+	configType := CSV
 	o.Logger.Debug("正在检查模板文件中机器是否有效...")
-	reader := csv.NewReader(file)
-	rows, err := reader.ReadAll()
-	if err != nil {
-		return fmt.Errorf("读取机器模板文件[%s]失败: [%v]", o.MachineInfoPath, err)
+	reader := csv.NewReader(strings.NewReader(string(data)))
+	rows, configErr := reader.ReadAll()
+	if configErr != nil {
+		configType = YML
 	}
 
+	var allMachines []Machine
+	machineNameSet := make(map[string]bool)
+	if configType == CSV {
+		var nameIdx, typeIdx, hostIdx, portIdx, usernameIdx, passwordIdx int
+		var privilegeTypeIdx, privilegePwdIdx = -1, -1
+		for index, row := range rows {
+			if index == 0 {
+				for rowIdx, rowValue := range row {
+					switch strings.ToLower(rowValue) {
+					case "name":
+						nameIdx = rowIdx
+					case "type":
+						typeIdx = rowIdx
+					case "host":
+						hostIdx = rowIdx
+					case "port":
+						portIdx = rowIdx
+					case "username":
+						usernameIdx = rowIdx
+					case "password":
+						passwordIdx = rowIdx
+					case "privilege_type":
+						privilegeTypeIdx = rowIdx
+					case "privilege_password":
+						privilegePwdIdx = rowIdx
+					}
+				}
+				continue
+			}
+			if len(row) != 6 && len(row) != 8 {
+				return fmt.Errorf("文件第 %v 行的机器配置内容不完整，请检查: %v", index+1, o.MachineInfoPath)
+			}
+			name, type_, host, port := row[nameIdx], row[typeIdx], row[hostIdx], row[portIdx]
+			username, password := row[usernameIdx], row[passwordIdx]
+			var privilegeType, privilegePwd = "", ""
+			if privilegeTypeIdx != -1 {
+				privilegeType = row[privilegeTypeIdx]
+			}
+			if privilegePwdIdx != -1 {
+				privilegePwd = row[privilegePwdIdx]
+			}
+			machine := Machine{
+				Name: name, Type: strings.ToLower(type_), Host: host, Port: port,
+				Username: username, Password: password, PriType: privilegeType, PriPwd: privilegePwd,
+			}
+			allMachines = append(allMachines, machine)
+		}
+	} else {
+		var config struct {
+			Servers []Machine `yaml:"servers"`
+		}
+		ymlErr := yaml.Unmarshal(data, &config)
+		if err != nil {
+			msg := fmt.Sprintf("%s 或者 %s", configErr, ymlErr)
+			return fmt.Errorf("读取机器模板文件 %s 失败: %s", o.MachineInfoPath, msg)
+		}
+		allMachines = append(allMachines, config.Servers...)
+	}
+
+	var invalidMachines []Machine
 	tableTitle := []string{"名称", "类型", "主机地址", "主机端口", "主机用户名", "提权方式", "是否有效"}
 	table, tableErr := gotable.Create(tableTitle...)
 	if tableErr != nil {
 		return fmt.Errorf("初始化表格显示器失败: [%v]", err)
 	}
-	var invalidMachines []Machine
-	machineNameSet := make(map[string]bool)
-	var nameIdx, typeIdx, hostIdx, portIdx, usernameIdx, passwordIdx int
-	var privilegeTypeIdx, privilegePwdIdx = -1, -1
-	for index, row := range rows {
-		if index == 0 {
-			for rowIdx, rowValue := range row {
-				switch strings.ToLower(rowValue) {
-				case "name":
-					nameIdx = rowIdx
-				case "type":
-					typeIdx = rowIdx
-				case "host":
-					hostIdx = rowIdx
-				case "port":
-					portIdx = rowIdx
-				case "username":
-					usernameIdx = rowIdx
-				case "password":
-					passwordIdx = rowIdx
-				case "privilege_type":
-					privilegeTypeIdx = rowIdx
-				case "privilege_password":
-					privilegePwdIdx = rowIdx
-				}
-			}
-			continue
+	for index, m := range allMachines {
+		valid := "x"
+		m.Type = strings.ToLower(m.Type)
+		if m.Password == "" && m.SSHKeyPath == "" {
+			o.Logger.MsgOneLine(common.NoType, "")
+			title := fmt.Sprintf(
+				"请输入主机为 %s(%v)，用户名 %s 的密码：",
+				m.Name, m.Host, m.Username,
+			)
+			m.Password = o.getPasswordFromUser(title)
 		}
-		if len(row) != 6 && len(row) != 8 {
-			return fmt.Errorf("文件第 %v 行的机器配置内容不完整，请检查: %v", index+1, o.MachineInfoPath)
+		if m.PriType != "" && m.PriPwd == "" {
+			title := fmt.Sprintf("请输入主机为 %s(%s)，root 的密码：", m.Name, m.Host)
+			m.PriPwd = o.getPasswordFromUser(title)
 		}
-		name, type_, host, port := row[nameIdx], row[typeIdx], row[hostIdx], row[portIdx]
-		username, password, valid := row[usernameIdx], row[passwordIdx], "×"
-		var privilegeType, privilegePwd = "无", ""
-		if privilegeTypeIdx != -1 {
-			privilegeType = row[privilegeTypeIdx]
-		}
-		if privilegePwdIdx != -1 {
-			privilegePwd = row[privilegePwdIdx]
-		}
-		if password == "" {
-			title := fmt.Sprintf("请输入主机为 %s([%s])，用户名 [%s] 的密码：", name, host, username)
-			password = o.getPasswordFromUser(title)
-		}
-		if privilegeType != "无" && privilegePwd == "" {
-			title := fmt.Sprintf("请输入主机为 %s([%s])，root 的密码：", name, host)
-			privilegePwd = o.getPasswordFromUser(title)
-		}
-		machine := Machine{
-			Name: name, Type: strings.ToLower(type_), Host: host, Port: port,
-			Username: username, Password: password, PriType: privilegeType, PriPwd: privilegePwd,
-		}
-		if _, ok := machineNameSet[name]; ok {
-			return fmt.Errorf("待巡检机器名称重复，名称为: %s", name)
+		if _, ok := machineNameSet[m.Name]; ok {
+			return fmt.Errorf("待巡检机器名称重复，名称为: %s", m.Name)
 		} else {
-			machineNameSet[name] = true
+			machineNameSet[m.Name] = true
 		}
-		o.Logger.MsgOneLine(common.NoType, "\t%v: 正在检查机器 %s([%s]) 是否可连接...", index, machine.Name, machine.Host)
-		if err = machine.Connect(); err == nil {
-			machine.Valid = true
-			o.MachineSet = append(o.MachineSet, machine)
+		o.Logger.MsgOneLine(
+			common.NoType, "\t%v: 正在检查机器 %s(%s) 是否可连接...",
+			index+1, m.Name, m.Host,
+		)
+		if err = m.Connect(); err == nil {
+			m.Valid = true
+			o.MachineSet = append(o.MachineSet, m)
 			valid = "✔"
 		} else {
-			machine.Valid = false
-			valid = "×"
-			invalidMachines = append(invalidMachines, machine)
+			m.Valid = false
+			invalidMachines = append(invalidMachines, m)
 		}
 		_ = table.AddRow([]string{
-			name, type_, host, port, username, privilegeType, valid,
+			m.Name, m.Type, m.Host, m.Port, m.Username, m.PriType, valid,
 		})
 	}
 	o.Logger.MsgOneLine(common.Success, "机器检查完成，具体如下：")

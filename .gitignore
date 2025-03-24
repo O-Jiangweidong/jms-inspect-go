@@ -5,4 +5,5 @@ output/
 test*
 config/*
 !config/machine-demo.csv
+!config/machine-demo.yml
 release/

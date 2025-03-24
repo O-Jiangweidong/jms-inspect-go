@@ -36,8 +36,17 @@ func ConfigFileToMap(filepath string) (map[string]string, error) {
 	return configMap, nil
 }
 
-func BoolDisplay(value string) string {
-	if res, _ := strconv.ParseBool(value); res {
+func BoolDisplay(value interface{}) string {
+	var result bool
+	switch v := value.(type) {
+	case string:
+		result, _ = strconv.ParseBool(v)
+	case bool:
+		result = v
+	default:
+		result = false
+	}
+	if result {
 		return Yes
 	} else {
 		return No
