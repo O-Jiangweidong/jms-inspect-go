@@ -1,0 +1,19 @@
+servers:
+  - name: 测试堡垒机环境
+    type: JumpServer
+    host: 192.168.11.1
+    port: 22
+    username: root
+    password: "123456"
+    ssh_key_path: ""
+    privilege_type: ""
+    privilege_password: ""
+
+  - name: 生产堡垒机环境
+    type: JumpServer
+    host: 192.168.11.1
+    port: 22
+    username: proc
+    password: ""
+    privilege_type: "su -"
+    privilege_password: ""
