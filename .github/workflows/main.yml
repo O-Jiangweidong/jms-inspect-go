@@ -40,7 +40,7 @@ jobs:
       - name: Execute build script
         run: |
           CURRENT_TAG=${{ github.event.release.tag_name }}
-          chmod +x./build.sh
+          chmod +x ./build.sh
           VERSION=$CURRENT_TAG ./build.sh 
 
       - name: Upload Release Assets
