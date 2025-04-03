@@ -12,7 +12,6 @@ import (
 	"syscall"
 
 	"github.com/go-redis/redis"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/liushuochen/gotable"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/yaml.v3"
@@ -38,7 +37,7 @@ func (c *Command) Value() string {
 type GlobalInfo struct {
 	Machines        []Machine
 	JMSCount        int
-	MySQLCount      int
+	RDSCount        int
 	RedisCount      int
 	TotalCount      int
 	InspectDatetime string
@@ -71,12 +70,13 @@ func (r *ResultSummary) SetGlobalInfo(opts *Options) {
 		case common.JumpServer:
 			r.GlobalInfo.JMSCount += 1
 		case common.MySQL:
-			r.GlobalInfo.MySQLCount += 1
+		case common.PostgreSQL:
+			r.GlobalInfo.RDSCount += 1
 		case common.Redis:
 			r.GlobalInfo.RedisCount += 1
 		}
 	}
-	r.GlobalInfo.TotalCount = r.GlobalInfo.JMSCount + r.GlobalInfo.RedisCount + r.GlobalInfo.MySQLCount
+	r.GlobalInfo.TotalCount = r.GlobalInfo.JMSCount + r.GlobalInfo.RedisCount + r.GlobalInfo.RDSCount
 }
 
 type Options struct {
@@ -91,15 +91,15 @@ type Options struct {
 	// 解析的参数
 	JMSConfig   map[string]string
 	MachineSet  []Machine
-	MySQLClient *sql.DB
+	RDSClient   RDSClient
 	RedisClient *redis.Client
 	EnableRedis bool
-	EnableMySQL bool
+	EnableRDS   bool
 }
 
 func (o *Options) Clear() {
-	if o.MySQLClient != nil {
-		_ = o.MySQLClient.Close()
+	if o.RDSClient != nil {
+		_ = o.RDSClient.Close()
 	}
 	if o.RedisClient != nil {
 		_ = o.RedisClient.Close()
@@ -107,11 +107,11 @@ func (o *Options) Clear() {
 }
 
 func (o *Options) Transform() {
-	o.EnableMySQL, o.EnableRedis = true, true
+	o.EnableRDS, o.EnableRedis = true, true
 	for _, taskName := range strings.Split(o.ExcludeTask, ",") {
 		switch strings.TrimSpace(taskName) {
-		case "mysql":
-			o.EnableMySQL = false
+		case "rds":
+			o.EnableRDS = false
 		case "redis":
 			o.EnableRedis = false
 		}
@@ -147,6 +147,8 @@ func (o *Options) GetHostFromDocker(host string) string {
 		container = "jms_mysql"
 	} else if host == "redis" {
 		container = "jms_redis"
+	} else if host == "postgresql" {
+		container = "jms_postgresql"
 	}
 	if container != "" {
 		baseCommand := fmt.Sprintf("docker inspect -f '{{.NetworkSettings.Networks.jms_net.IPAddress}}' %s", container)
@@ -167,30 +169,48 @@ func (o *Options) GetHostFromDocker(host string) string {
 	return host
 }
 
-func (o *Options) GetMySQLClient() (*sql.DB, error) {
+func (o *Options) GetRDSClient() (RDSClient, error) {
+	var dsn string
 	host := o.GetHostFromDocker(o.JMSConfig["DB_HOST"])
 	port := o.JMSConfig["DB_PORT"]
 	database := o.JMSConfig["DB_NAME"]
 	username := o.JMSConfig["DB_USER"]
 	password := o.JMSConfig["DB_PASSWORD"]
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, database)
-	return sql.Open("mysql", dsn)
+	engine := o.JMSConfig["DB_ENGINE"]
+	driverName := "mysql"
+	if engine == common.PostgreSQL {
+		driverName = "postgres"
+		dsn = fmt.Sprintf(
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			host, port, username, password, database,
+		)
+	} else {
+		dsn = fmt.Sprintf(
+			"%s:%s@tcp(%s:%s)/%s",
+			username, password, host, port, database,
+		)
+	}
+	db, err := sql.Open(driverName, dsn)
+	if err != nil {
+		return nil, err
+	}
+	return newSQLClient(engine, database, db), nil
 }
 
-func (o *Options) CheckMySQL() error {
-	if !o.EnableMySQL {
+func (o *Options) CheckRDS() error {
+	if !o.EnableRDS {
 		return nil
 	}
-	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer Config) 配置文件，检查 JumpServer MySQL 是否可连接...")
-	db, err := o.GetMySQLClient()
+	o.Logger.MsgOneLine(common.NoType, "根据 JC(JumpServer Config) 配置文件，检查 JumpServer 数据库是否可连接...")
+	db, err := o.GetRDSClient()
 	if err != nil {
 		o.Logger.MsgOneLine(common.NoType, "")
 		return err
 	}
-	o.MySQLClient = db
+	o.RDSClient = db
 	if err = db.Ping(); err != nil {
 		o.Logger.MsgOneLine(common.NoType, "")
-		return fmt.Errorf("连接 JumpServer MySQL 失败: %v", err)
+		return fmt.Errorf("连接 JumpServer RDS 失败: %v", err)
 	}
 	return nil
 }
@@ -266,7 +286,7 @@ func (o *Options) CheckRedis() error {
 }
 
 func (o *Options) CheckDB() error {
-	if err := o.CheckMySQL(); err != nil {
+	if err := o.CheckRDS(); err != nil {
 		return err
 	}
 	if err := o.CheckRedis(); err != nil {

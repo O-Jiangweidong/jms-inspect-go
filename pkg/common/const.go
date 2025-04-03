@@ -9,6 +9,7 @@ const (
 	Slight     = "slight"
 	JumpServer = "jumpserver"
 	MySQL      = "mysql"
+	PostgreSQL = "postgresql"
 	Redis      = "redis"
 
 	EmptyFlag = "-"

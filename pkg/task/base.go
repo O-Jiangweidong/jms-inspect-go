@@ -178,11 +178,11 @@ func (t *Task) Init(opts *Options) error {
 	return nil
 }
 
-func (t *Task) GetConfig(key, input string) string {
+func (t *Task) GetConfig(key, defaultV string) string {
 	if v, exist := t.Options.JMSConfig[key]; exist {
 		return v
 	} else {
-		return input
+		return defaultV
 	}
 }
 

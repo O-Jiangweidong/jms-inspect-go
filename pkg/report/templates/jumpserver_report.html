@@ -253,7 +253,7 @@
                 <h5>
                     本次巡检共巡检 {{ .GlobalInfo.TotalCount }} 个节点，
                     其中应用节点 {{ .GlobalInfo.JMSCount }} 个，
-                    数据库节点 {{ .GlobalInfo.MySQLCount }} 个，
+                    数据库节点 {{ .GlobalInfo.RDSCount }} 个，
                     Redis节点 {{ .GlobalInfo.RedisCount }} 个。具体如下表所示：
                 </h5>
                 <table>
@@ -323,7 +323,7 @@
                 <div>
                     <div>
                         <p>巡检内容共分为两部分，一是系统巡检，二是运营巡检。</p>
-                        <p>系统巡检主要检查操作系统、堡垒机软件、依赖中间件如 Mysql、Redis 等组件是否工作正常。</p>
+                        <p>系统巡检主要检查操作系统、堡垒机软件、依赖中间件如 RDS、Redis 等组件是否工作正常。</p>
                         <p>运营巡检主要收集当前堡垒机平台上的用户数以及最近一段时间的主要运行指标。</p>
                     </div>
                 </div>
@@ -362,66 +362,20 @@
         </div>
     </div>
 
-    <!--  MySQL 页签  -->
-    {{ if .DBResult.HasMySQLInfo }}
+    <!--  RDS 页签  -->
+    {{ if .DBResult.HasRDSInfo }}
     <div class="page">
         <div class="page-header"></div>
         <div style="text-align: center">
             <div style="text-align: left; margin: 0 5%">
-                <h3>2.1 MySQL 状态如下表：</h3>
+                <h3>2.1 RDS 状态如下表：</h3>
                 <table class="v-table">
+                    {{ range .DBResult.DBInfo }}
                     <tr>
-                        <th>数据库运行时长</th>
-                        <td>{{ .DBResult.DBOperatingTime }}</td>
+                        <th>{{ .Name }}</th>
+                        <td>{{ .Value }}</td>
                     </tr>
-                    <tr>
-                        <th>SQL MODE</th>
-                        <td>{{ .DBResult.DBSqlMode }}</td>
-                    </tr>
-                    <tr>
-                        <th>最大连接数</th>
-                        <td>{{ .DBResult.DBMaxConnect }}</td>
-                    </tr>
-                    <tr>
-                        <th>当前连接数</th>
-                        <td>{{ .DBResult.DBCurrentConnect }}</td>
-                    </tr>
-                    <tr>
-                        <th>QPS</th>
-                        <td>{{ .DBResult.DBQps }}</td>
-                    </tr>
-                    <tr>
-                        <th>TPS</th>
-                        <td>{{ .DBResult.DBTps }}</td>
-                    </tr>
-                    <tr>
-                        <th>慢查询数</th>
-                        <td>{{ .DBResult.DBSlowQuery }}</td>
-                    </tr>
-                    <tr>
-                        <th>当前事务数</th>
-                        <td>{{ .DBResult.DBCurrentTransaction }}</td>
-                    </tr>
-                    <tr>
-                        <th>字符集</th>
-                        <td>{{ .DBResult.DBCharset }}</td>
-                    </tr>
-                    <tr>
-                        <th>排序规则</th>
-                        <td>{{ .DBResult.DBSortRule }}</td>
-                    </tr>
-                    <tr>
-                        <th>Slave IO Running</th>
-                        <td>{{ .DBResult.DBSlaveIORunning }}</td>
-                    </tr>
-                    <tr>
-                        <th>Slave SQL Running</th>
-                        <td>{{ .DBResult.DBSlaveSqlRunning }}</td>
-                    </tr>
-                    <tr>
-                        <th>总表数</th>
-                        <td>{{ .DBResult.DBTableCount }}</td>
-                    </tr>
+                    {{ end }}
                 </table>
 
                 <h3>2.2 数据库表大小前10位：</h3>
@@ -429,7 +383,7 @@
                     <tr>
                         <th>表名</th>
                         <th>记录数</th>
-                        <th>表大小(M)</th>
+                        <th>表大小</th>
                     </tr>
                     {{ range .DBResult.Top10Table }}
                     <tr>
@@ -820,7 +774,14 @@
             <div style="text-align: left; margin: 0 5%">
                 <h3>4.1 运营巡检</h3>
                 <small>
-                    当前共有 <strong>{{ .VirtualResult.OrganizationCount }}</strong> 个组织，<strong>{{ .VirtualResult.UserCount }}</strong> 个用户，<strong>{{ .VirtualResult.AssetCount }}</strong> 个资产(前三: {{ .VirtualResult.AssetCountDisplay }})，<strong>{{ .VirtualResult.OnlineSession }}</strong> 个在线会话。最大单日登录次数 <strong>{{ .VirtualResult.MaxLoginCount }}</strong> 次，最大单日访问资产数 <strong>{{ .VirtualResult.MaxConnectAssetCount }}</strong> 次, 详细指标数据参见下表。
+                    当前共有 <strong>{{ .VirtualResult.OrganizationCount }}</strong> 个组织；
+                    <strong>{{ .VirtualResult.UserCount }}</strong> 个用户；
+                    <strong>{{ .VirtualResult.AssetCount }}</strong> 个资产；
+                    资产类型前三: {{ .VirtualResult.AssetCountDisplay }}；
+                    <strong>{{ .VirtualResult.OnlineSession }}</strong> 个在线会话。
+                    最大单日登录次数 <strong>{{ .VirtualResult.MaxLoginCount }}</strong> 次，
+                    最大单日访问资产数 <strong>{{ .VirtualResult.MaxLoginAssetCount }}</strong> 次。
+                    详细指标数据参见下表：
                 </small>
                 <br>
                 <table class="v-table">
@@ -830,7 +791,7 @@
                     </tr>
                     <tr>
                         <th>近三月最大单日资产登录数 </th>
-                        <td>{{ .VirtualResult.Last3MonthMaxConnectAssetCount }}</td>
+                        <td>{{ .VirtualResult.Last3MonthMaxLoginAssetCount }}</td>
                     </tr>
                     <tr>
                         <th>近三月登录用户数</th>
@@ -965,7 +926,7 @@
             trigger: "axis",
         },
         xAxis: {
-            data: {{ or .VirtualResult.AssetConnectChart.X "[]"}}
+            data: {{ or .VirtualResult.AssetLoginChart.X "[]"}}
         },
         yAxis: {},
         series: [{
@@ -977,7 +938,7 @@
                     { offset: 0, color: '#77b2df' }
                 ])
             },
-            data: {{ or .VirtualResult.AssetConnectChart.Y "[]"}}
+            data: {{ or .VirtualResult.AssetLoginChart.Y "[]"}}
         }]
     };
     assetChart.setOption(assetChartOption);

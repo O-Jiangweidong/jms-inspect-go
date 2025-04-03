@@ -1,28 +1,19 @@
 package task
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/go-redis/redis"
 	"inspect/pkg/common"
-	"strconv"
 	"strings"
 )
-
-type TableInfo struct {
-	TableName   string
-	TableRecord string
-	TableSize   string
-}
 
 type DBTask struct {
 	Task
 
-	mysqlClient *sql.DB
+	rdsClient   RDSClient
 	redisClient *redis.Client
 
 	redisInfo map[string]string
-	mysqlInfo map[string]string
 }
 
 func (t *DBTask) Init(opts *Options) error {
@@ -32,13 +23,12 @@ func (t *DBTask) Init(opts *Options) error {
 		t.redisClient = opts.GetRedisClient()
 	}
 
-	if opts.EnableMySQL {
-		client, err := opts.GetMySQLClient()
+	if opts.EnableRDS {
+		client, err := opts.GetRDSClient()
 		if err != nil {
 			return err
 		}
-		t.mysqlInfo = make(map[string]string)
-		t.mysqlClient = client
+		t.rdsClient = client
 	}
 	return nil
 }
@@ -51,141 +41,27 @@ func (t *DBTask) Get(key string) string {
 	}
 }
 
-func (t *DBTask) dbGet(key, input string) string {
-	if v, exist := t.mysqlInfo[key]; exist {
-		return v
-	} else {
-		return input
-	}
-}
-
-func (t *DBTask) GetVariables(command string) error {
-	rows, err := t.mysqlClient.Query(command)
-	if err != nil {
-		return err
-	}
-	defer func(rows *sql.Rows) {
-		_ = rows.Close()
-	}(rows)
-
-	for rows.Next() {
-		var name, value string
-		err = rows.Scan(&name, &value)
-		if err != nil {
-			continue
-		}
-		t.mysqlInfo[name] = value
-	}
-	return nil
-}
-
 func (t *DBTask) GetTableInfo() error {
-	query := "SELECT table_name, table_rows, " +
-		"ROUND(data_length/1024/1024, 2) " +
-		"FROM information_schema.tables WHERE table_schema = ? " +
-		"ORDER BY table_rows DESC LIMIT 10;"
-
-	var tables []TableInfo
-	rows, err := t.mysqlClient.Query(query, t.GetConfig("DB_NAME", "JUMPSERVER"))
-	if err != nil {
+	if result, err := t.rdsClient.GetTableInfo(); err != nil {
 		return err
+	} else {
+		t.result["Top10Table"] = result
 	}
-	defer func(rows *sql.Rows) {
-		_ = rows.Close()
-	}(rows)
-
-	for rows.Next() {
-		var table TableInfo
-		_ = rows.Scan(&table.TableName, &table.TableRecord, &table.TableSize)
-		tables = append(tables, table)
-	}
-	t.result["Top10Table"] = tables
 	return nil
 }
 
 func (t *DBTask) GetDBInfo() error {
-	err := t.GetVariables("SHOW GLOBAL VARIABLES")
-	if err != nil {
+	if info, err := t.rdsClient.GetRDSInfo(); err != nil {
 		return err
+	} else {
+		t.result["DBInfo"] = info
 	}
-	err = t.GetVariables("SHOW GLOBAL STATUS")
-	if err != nil {
-		return err
-	}
-
-	// QPS 计算
-	upTime := t.dbGet("Uptime", "1")
-	questions := t.dbGet("Questions", "0")
-	upTimeInt, _ := strconv.Atoi(upTime)
-	questionsInt, _ := strconv.Atoi(questions)
-	t.result["DBQps"] = questionsInt / upTimeInt
-	// TPS 计算
-	commit := t.dbGet("Com_commit", "0")
-	rollback := t.dbGet("Com_rollback", "0")
-	commitInt, _ := strconv.Atoi(commit)
-	rollbackInt, _ := strconv.Atoi(rollback)
-	tps := (commitInt + rollbackInt) / upTimeInt
-	t.result["DBTps"] = tps
-	// 获取slave信息
-	dbSlaveSqlRunning := common.Empty
-	dbSlaveIORunning := common.Empty
-	rows, err := t.mysqlClient.Query("SHOW SLAVE STATUS")
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		columns, err := rows.Columns()
-		if err != nil {
-			return err
-		}
-		valuePointers := make([]interface{}, len(columns))
-		for i := range valuePointers {
-			var value interface{}
-			valuePointers[i] = &value
-		}
-		if err = rows.Scan(valuePointers...); err != nil {
-			continue
-		}
-		for i, name := range columns {
-			value := *(valuePointers[i].(*interface{}))
-			switch v := value.(type) {
-			case []byte:
-				value = string(v)
-			}
-			switch name {
-			case "Slave_SQL_Running":
-				dbSlaveSqlRunning = fmt.Sprintf("%v", value)
-			case "Slave_IO_Running":
-				dbSlaveIORunning = fmt.Sprintf("%v", value)
-			}
-		}
-	}
-	t.result["DBSlaveIORunning"] = dbSlaveIORunning
-	t.result["DBSlaveSqlRunning"] = dbSlaveSqlRunning
-	// 获取表数量
-	var tableCount string
-	tableCountQuery := "SELECT COUNT(*) FROM information_schema.tables WHERE table_type='BASE TABLE'"
-	_ = t.mysqlClient.QueryRow(tableCountQuery).Scan(&tableCount)
-	t.result["DBTableCount"] = tableCount
-	// 获取当前事务数量
-	var trxQueryCount string
-	trxQuery := "SELECT count(*) FROM information_schema.innodb_trx"
-	_ = t.mysqlClient.QueryRow(trxQuery).Scan(&trxQueryCount)
-	t.result["DBCurrentTransaction"] = trxQueryCount
-	// 其他
-	t.result["DBOperatingTime"] = common.SecondDisplay(upTimeInt)
-	t.result["DBSqlMode"] = t.dbGet("sql_mode", common.Empty)
-	t.result["DBMaxConnect"] = t.dbGet("max_connections", common.Empty)
-	t.result["DBCurrentConnect"] = t.dbGet("Threads_connected", common.Empty)
-	t.result["DBSlowQuery"] = t.dbGet("slow_query_log", common.Empty)
-	t.result["DBCharset"] = t.dbGet("character_set_database", common.Empty)
-	t.result["DBSortRule"] = t.dbGet("collation_database", common.Empty)
 	return nil
 }
 
-func (t *DBTask) GetMySQLInfo() error {
-	t.result["HasMySQLInfo"] = t.Options.EnableMySQL
-	if !t.Options.EnableMySQL {
+func (t *DBTask) GetRDSInfo() error {
+	t.result["HasRDSInfo"] = t.Options.EnableRDS
+	if !t.Options.EnableRDS {
 		return nil
 	}
 	if err := t.GetTableInfo(); err != nil {
@@ -259,7 +135,6 @@ func (t *DBTask) GetRedisInfo() error {
 	t.result["KeyspaceMisses"] = t.Get("keyspace_misses")
 	t.result["PubSubChannels"] = t.Get("pubsub_channels")
 	t.result["PubSubPatterns"] = t.Get("pubsub_patterns")
-
 	return nil
 }
 
@@ -268,7 +143,7 @@ func (t *DBTask) GetName() string {
 }
 
 func (t *DBTask) Run() error {
-	if err := t.GetMySQLInfo(); err != nil {
+	if err := t.GetRDSInfo(); err != nil {
 		return err
 	}
 	if err := t.GetRedisInfo(); err != nil {

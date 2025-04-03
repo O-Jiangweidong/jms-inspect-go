@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"inspect/pkg/common"
 	"inspect/pkg/report"
 	"inspect/pkg/task"
@@ -35,7 +36,7 @@ func main() {
 	)
 	flag.StringVar(
 		&opts.ExcludeTask, "et", opts.ExcludeTask,
-		"不执行的任务，多个任务中间用逗号隔开(mysql、redis)",
+		"不执行的任务，多个任务中间用逗号隔开(rds、redis)",
 	)
 	flag.Parse()
 

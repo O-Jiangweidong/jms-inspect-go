@@ -140,3 +140,11 @@ func GetTerminalWidth() (int, error) {
 	}
 	return width, nil
 }
+
+func InputOrEmpty(input string) string {
+	if input == "" {
+		return EmptyFlag
+	} else {
+		return input
+	}
+}
