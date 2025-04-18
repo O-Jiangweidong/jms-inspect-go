@@ -1,8 +1,10 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -61,7 +63,7 @@ func (l *Logger) logPrintForever() {
 				fmt.Print(msg.Content)
 			}
 			if msg.Type == Error {
-				os.Exit(1)
+				l.Exit(1)
 			}
 		}
 	}
@@ -159,6 +161,14 @@ func (l *Logger) Error(format string, a ...any) {
 
 func (l *Logger) Finished(format string, a ...any) {
 	fmt.Println(fmt.Sprintf(format, a...))
+	l.Exit(0)
+}
+
+func (l *Logger) Exit(code int) {
+	for _, callback := range FinishedCallbacks {
+		callback()
+	}
+	os.Exit(code)
 }
 
 func newLogger() *Logger {
@@ -176,4 +186,34 @@ func GetLogger() *Logger {
 		logger = newLogger()
 	})
 	return logger
+}
+
+type DebugLogger struct {
+	file    *os.File
+	content string
+}
+
+func (l *DebugLogger) Write(obj interface{}) error {
+	jsonData, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		return err
+	}
+	if l.content != "" {
+		l.content += "\n"
+	}
+	l.content += string(jsonData)
+	return nil
+}
+
+func (l *DebugLogger) Close() {
+	if l.file != nil {
+		_, _ = l.file.WriteString(l.content)
+		_ = l.file.Close()
+	}
+}
+
+func NewDebugLogger() *DebugLogger {
+	filePath := path.Join(OutputDir, "inspect.log")
+	file, _ := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	return &DebugLogger{file: file, content: ""}
 }

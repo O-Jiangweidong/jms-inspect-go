@@ -38,6 +38,9 @@ func main() {
 		&opts.ExcludeTask, "et", opts.ExcludeTask,
 		"不执行的任务，多个任务中间用逗号隔开(rds、redis)",
 	)
+	flag.BoolVar(
+		&opts.Debug, "debug", opts.Debug, "开启调试模式",
+	)
 	flag.Parse()
 
 	logger.Debug("开始检查配置等相关信息...")

@@ -89,12 +89,13 @@ type Options struct {
 	ExcludeTask     string
 
 	// 解析的参数
-	JMSConfig   map[string]string
-	MachineSet  []Machine
-	RDSClient   RDSClient
-	RedisClient *redis.Client
-	EnableRedis bool
-	EnableRDS   bool
+	JMSConfig    map[string]string
+	MachineSet   []Machine
+	RDSClient    RDSClient
+	RedisClient  *redis.Client
+	EnableRedis  bool
+	EnableRDS    bool
+	DebugLogFile *common.DebugLogger
 }
 
 func (o *Options) Clear() {
@@ -104,6 +105,17 @@ func (o *Options) Clear() {
 	if o.RedisClient != nil {
 		_ = o.RedisClient.Close()
 	}
+}
+
+func (o *Options) PreDebug() error {
+	if o.Debug == false {
+		return nil
+	}
+	o.DebugLogFile = common.NewDebugLogger()
+	common.AddCallback(func() {
+		o.DebugLogFile.Close()
+	})
+	return nil
 }
 
 func (o *Options) Transform() {
@@ -427,8 +439,12 @@ func (o *Options) CheckMachine() error {
 			m.Valid = false
 			invalidMachines = append(invalidMachines, m)
 		}
+		priType := m.PriType
+		if priType == "" {
+			priType = common.EmptyFlag
+		}
 		_ = table.AddRow([]string{
-			m.Name, m.Type, m.Host, m.Port, m.Username, m.PriType, valid,
+			m.Name, m.Type, m.Host, m.Port, m.Username, priType, valid,
 		})
 	}
 	o.Logger.MsgOneLine(common.Success, "机器检查完成，具体如下：")
@@ -451,6 +467,9 @@ func (o *Options) CheckMachine() error {
 }
 
 func (o *Options) Valid() error {
+	if err := o.PreDebug(); err != nil {
+		return err
+	}
 	o.Transform()
 	if err := o.CheckJMSConfig(); err != nil {
 		return err

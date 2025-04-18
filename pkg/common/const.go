@@ -12,5 +12,5 @@ const (
 	PostgreSQL = "postgresql"
 	Redis      = "redis"
 
-	EmptyFlag = "-"
+	EmptyFlag = " - "
 )
