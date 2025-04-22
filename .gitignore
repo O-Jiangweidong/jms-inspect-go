@@ -7,3 +7,4 @@ config/*
 !config/machine-demo.csv
 !config/machine-demo.yml
 release/
+echarts.min.js
