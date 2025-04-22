@@ -44,6 +44,16 @@ type GlobalInfo struct {
 	JMSVersion      string
 }
 
+func IsValidType(machineType string) error {
+	validTypes := []string{"mysql", "jumpserver"}
+	for _, element := range validTypes {
+		if element == machineType {
+			return nil
+		}
+	}
+	return fmt.Errorf("无效的类型 %s, 目前仅支持 %s", machineType, strings.Join(validTypes, ", "))
+}
+
 type ResultSummary struct {
 	GlobalInfo GlobalInfo
 
@@ -410,6 +420,10 @@ func (o *Options) CheckMachine() error {
 	for index, m := range allMachines {
 		valid := "x"
 		m.Type = strings.ToLower(m.Type)
+
+		if err = IsValidType(m.Type); err != nil {
+			return err
+		}
 		if m.Password == "" && m.SSHKeyPath == "" {
 			o.Logger.MsgOneLine(common.NoType, "")
 			title := fmt.Sprintf(
