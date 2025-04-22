@@ -4,11 +4,18 @@
 # 定义函数
 build_and_zip() {
     local goos=$1
-    local output_binary=$2
-    local zip_file="jms_inspect_${goos}.zip"
+    local arch=$2
+    local output_binary=$3
+    local version=$4
+    local zip_file="jms_inspect_${goos}_${arch}"
 
-    echo "开始编译 ${goos} 版本脚本"
-    bash -c "CGO_ENABLED=0 GOOS=${goos} GOARCH=amd64 go build -o ${output_binary} pkg/cmd/inspect.go"
+    if [ -n "$version" ]; then
+      zip_file="${zip_file}_${version}"
+    fi
+    zip_file="${zip_file}.zip"
+
+    echo "开始编译 ${goos}-${arch} 版本脚本"
+    bash -c "CGO_ENABLED=0 GOOS=${goos} GOARCH=${arch} go build -o ${output_binary} pkg/cmd/inspect.go"
 
     if [ $? -ne 0 ]; then
         echo "编译失败，请检查错误信息。"
@@ -40,12 +47,24 @@ build() {
       sed -i "s/const version = \"dev\"/const version = \"$VERSION\"/" "pkg/cmd/inspect.go"
     fi
   fi
-  # Mac
-  build_and_zip "darwin" "jms_inspect"
-  # Linux
-  build_and_zip "linux" "jms_inspect"
-  # Windows
-  build_and_zip "windows" "jms_inspect.exe"
+
+  os_arch_combinations=(
+      "darwin amd64"
+      "darwin arm64"
+      "linux amd64"
+      "linux arm64"
+      "windows amd64"
+      "windows arm64"
+  )
+  for combination in "${os_arch_combinations[@]}"; do
+      IFS=' ' read -r goos arch <<< "$combination"
+      if [ "$goos" = "windows" ]; then
+          output_binary="jms_inspect.exe"
+      else
+          output_binary="jms_inspect"
+      fi
+      build_and_zip "$goos" "$arch" "$output_binary" "$VERSION"
+  done
 }
 
 build "$@"
