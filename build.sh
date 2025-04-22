@@ -62,7 +62,6 @@ compile() {
       "linux amd64"
       "linux arm64"
       "windows amd64"
-      "windows arm64"
   )
   for combination in "${os_arch_combinations[@]}"; do
       IFS=' ' read -r goos arch <<< "$combination"
