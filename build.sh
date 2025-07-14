@@ -68,7 +68,11 @@ compile() {
     )
     for combination in "${os_arch_combinations[@]}"; do
         IFS=' ' read -r goos arch <<< "$combination"
-        output_binary="jms_inspect${goos == "windows" ? ".exe" : ""}"
+        if [ "$goos" = "windows" ]; then
+            output_binary="jms_inspect.exe"
+        else
+            output_binary="jms_inspect"
+        fi
         build_and_zip "$goos" "$arch" "$output_binary" "$version"
     done
 }
