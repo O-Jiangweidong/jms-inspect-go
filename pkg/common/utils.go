@@ -109,18 +109,15 @@ func SpaceDisplay(sizeKB int64) string {
 	}
 }
 
-func GetOutputDir() (string, error) {
-	current, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
+func GetOutputDir() string {
+	current, _ := os.Getwd()
 	outputDir := path.Join(current, "output", CurrentDatetime("dir"))
 	if file, err := os.Stat(outputDir); err != nil || !file.IsDir() {
 		if err = os.MkdirAll(outputDir, 0700); err != nil {
-			return "", err
+			return ""
 		}
 	}
-	return outputDir, nil
+	return outputDir
 }
 
 func GetTerminalWidth() (int, error) {

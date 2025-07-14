@@ -54,6 +54,12 @@ func (t *DBTask) GetDBInfo() error {
 	if info, err := t.rdsClient.GetRDSInfo(); err != nil {
 		return err
 	} else {
+		if t.Options.Debug {
+			logData := map[string]map[string]string{
+				"数据库参数": t.rdsClient.GetRawRdsInfo(),
+			}
+			_ = t.Options.DebugLogFile.Write(logData)
+		}
 		t.result["DBInfo"] = info
 	}
 	return nil

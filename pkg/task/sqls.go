@@ -38,6 +38,7 @@ type RDSClient interface {
 	QueryRow(query string, args ...any) *sql.Row
 	Query(query string, args ...any) (*sql.Rows, error)
 
+	GetRawRdsInfo() map[string]string
 	GetTableInfo() ([]TableInfo, error)
 	GetRDSInfo() ([]RDSInfo, error)
 	GetMaxLoginCount() string
@@ -63,6 +64,10 @@ type RDSBaseClient struct {
 
 	DBName  string
 	rdsInfo map[string]string
+}
+
+func (c *RDSBaseClient) GetRawRdsInfo() map[string]string {
+	return c.rdsInfo
 }
 
 func (c *RDSBaseClient) Ping() error {

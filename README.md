@@ -1,9 +1,5 @@
-### 编译
-#### Mac
-`CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o jms_inspect pkg/cmd/inspect.go`
+# 使用
+机器的配置信息在 `releases` 中的压缩包的 config 目录中，配置文件支持 csv 和 yml 格式
 
-#### Windows
-`CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o jms_inspect.exe pkg/cmd/inspect.go`
-
-#### Linux
-`CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o jms_inspect pkg/cmd/inspect.go`
+# 编译
+VERSION=v1.0.0 bash build.sh
