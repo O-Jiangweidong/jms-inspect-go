@@ -22,10 +22,10 @@ build_and_zip() {
     fi
 
     local temp_dir=$(mktemp -d)
-    mkdir -p "${temp_dir}/config"
-    cp "${output_binary}" "${temp_dir}/"
-    cp "${base_dir}/config/machine-demo.csv" "${temp_dir}/config/"
-    cp "${base_dir}/config/machine-demo.yml" "${temp_dir}/config/"
+    mkdir -p "${temp_dir}/jms_inspect/config"
+    cp "${output_binary}" "${temp_dir}/jms_inspect/"
+    cp "${base_dir}/config/machine-demo.csv" "${temp_dir}/jms_inspect/config/"
+    cp "${base_dir}/config/machine-demo.yml" "${temp_dir}/jms_inspect/config/"
 
     (cd "${temp_dir}" && zip -r "${base_dir}/${zip_file}" .)
 
