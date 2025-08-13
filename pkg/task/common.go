@@ -94,6 +94,7 @@ type Options struct {
 
 	// 命令行参数
 	Debug           bool
+	Silent          bool
 	JMSConfigPath   string
 	MachineInfoPath string
 	ExcludeTask     string
@@ -467,6 +468,9 @@ func (o *Options) CheckMachine() error {
 		return fmt.Errorf("没有获取到有效的机器信息，请检查此文件内容: %s", o.MachineInfoPath)
 	}
 
+	if o.Silent {
+		return nil
+	}
 	var answer string
 	fmt.Printf("\n%s\n", table)
 	fmt.Print("是否继续执行，本次任务只会执行有效资产(默认为 yes): ")

@@ -41,7 +41,14 @@ func main() {
 	flag.BoolVar(
 		&opts.Debug, "debug", opts.Debug, "开启调试模式",
 	)
+	flag.BoolVar(
+		&opts.Silent, "silent", opts.Silent, "是否静默执行，开启后将不输入非 Error 类型日志信息",
+	)
 	flag.Parse()
+
+	if opts.Silent {
+		opts.Logger.SetSilent()
+	}
 
 	logger.Debug("开始检查配置等相关信息...")
 	if err := opts.Valid(); err != nil {

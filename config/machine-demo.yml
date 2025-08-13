@@ -1,6 +1,6 @@
 servers:
   - name: 测试堡垒机环境
-    type: JumpServer
+    type: JumpServer # mysql/jumpserver
     host: 192.168.11.1
     port: 22
     username: root
@@ -10,7 +10,7 @@ servers:
     privilege_password: ""
 
   - name: 生产堡垒机环境
-    type: JumpServer
+    type: JumpServer # mysql/jumpserver
     host: 192.168.11.1
     port: 22
     username: proc

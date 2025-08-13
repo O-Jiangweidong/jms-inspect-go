@@ -41,10 +41,15 @@ type LogMsg struct {
 
 type Logger struct {
 	spinnerFlag bool
+	silent      bool
 	stopChan    chan bool // 退出信号通道
 	msgChan     chan *LogMsg
 	msgCache    []string
 	sync.Mutex  // 锁
+}
+
+func (l *Logger) SetSilent() {
+	l.silent = true
 }
 
 func (l *Logger) logPrintForever() {
@@ -117,6 +122,9 @@ func (l *Logger) format(mType uint, newLine bool, format string, a ...any) *LogM
 }
 
 func (l *Logger) PushMsg(logMsg *LogMsg) {
+	if l.silent && logMsg.Type != Error {
+		return
+	}
 	if l.msgChan != nil {
 		l.msgChan <- logMsg
 	}
