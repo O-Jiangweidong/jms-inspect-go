@@ -1,12 +1,14 @@
 package task
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"inspect/pkg/common"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"syscall"
@@ -332,6 +334,10 @@ func (o *Options) getPasswordFromUser(answer string) string {
 	return password
 }
 
+type configYML struct {
+	Servers []Machine `yaml:"servers"`
+}
+
 func (o *Options) CheckMachine() error {
 	if o.MachineInfoPath == "" {
 		return fmt.Errorf("待巡检机器文件路径不能为空")
@@ -401,9 +407,7 @@ func (o *Options) CheckMachine() error {
 			allMachines = append(allMachines, machine)
 		}
 	} else {
-		var config struct {
-			Servers []Machine `yaml:"servers"`
-		}
+		var config configYML
 		ymlErr := yaml.Unmarshal(data, &config)
 		if err != nil {
 			msg := fmt.Sprintf("%s 或者 %s", configErr, ymlErr)
@@ -462,12 +466,28 @@ func (o *Options) CheckMachine() error {
 			m.Name, m.Type, m.Host, m.Port, m.Username, priType, valid,
 		})
 	}
+
+	o.Logger.MsgOneLine(common.NoType, "")
+	if configType == CSV {
+		var yamlData bytes.Buffer
+
+		config := configYML{Servers: allMachines}
+		encoder := yaml.NewEncoder(&yamlData)
+		encoder.SetIndent(2)
+		err = encoder.Encode(config)
+		if err == nil {
+			newPath := filepath.Join(filepath.Dir(o.MachineInfoPath), "auto-gen-config.yml")
+			err = os.WriteFile(newPath, yamlData.Bytes(), 0644)
+			if err == nil {
+				o.Logger.Warning("CSV 格式配置文件自动转为 YML 格式，后续新配置均只在 YML 配置文件上支持，新配置文件路径: %v", newPath)
+			}
+		}
+	}
 	o.Logger.MsgOneLine(common.Success, "机器检查完成，具体如下：")
 	if len(o.MachineSet) == 0 {
 		fmt.Printf("\n%s\n", table)
 		return fmt.Errorf("没有获取到有效的机器信息，请检查此文件内容: %s", o.MachineInfoPath)
 	}
-
 	if o.Silent {
 		return nil
 	}

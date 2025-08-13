@@ -13,16 +13,17 @@ import (
 )
 
 type Machine struct {
-	Name       string `yaml:"name" json:"name"`
-	Type       string `yaml:"type" json:"type"`
-	Host       string `yaml:"host" json:"host"`
-	Port       string `yaml:"port" json:"port"`
-	Username   string `yaml:"username" json:"username"`
-	Password   string `yaml:"password" json:"-"`
-	SSHKeyPath string `yaml:"ssh_key_path" json:"-"`
-	PriType    string `yaml:"privilege_type" json:"privilege_type"`
-	PriPwd     string `yaml:"privilege_password" json:"-"`
-	Valid      bool   `yaml:"valid" json:"valid"`
+	Name             string `yaml:"name" json:"name"`
+	Type             string `yaml:"type" json:"type"`
+	Host             string `yaml:"host" json:"host"`
+	Port             string `yaml:"port" json:"port"`
+	Username         string `yaml:"username" json:"username"`
+	Password         string `yaml:"password" json:"-"`
+	SSHKeyPath       string `yaml:"ssh_key_path" json:"-"`
+	SSHKeyPassphrase string `yaml:"ssh_key_passphrase" json:"-"`
+	PriType          string `yaml:"privilege_type" json:"privilege_type"`
+	PriPwd           string `yaml:"privilege_password" json:"-"`
+	Valid            bool   `yaml:"-" json:"valid"`
 
 	Client *ssh.Client `yaml:"-" json:"-"`
 }
@@ -36,9 +37,17 @@ func (m *Machine) Connect() error {
 		if err != nil {
 			return fmt.Errorf("密钥文件读取失败: %w", err)
 		}
-		signer, err := ssh.ParsePrivateKey(key)
-		if err != nil {
-			return fmt.Errorf("密钥文件解析失败: %w", err)
+		var signer ssh.Signer
+		if m.SSHKeyPassphrase != "" {
+			signer, err = ssh.ParsePrivateKeyWithPassphrase(key, []byte(m.SSHKeyPassphrase))
+			if err != nil {
+				return fmt.Errorf("带密码的密钥解析失败（密码可能错误）: %w", err)
+			}
+		} else {
+			signer, err = ssh.ParsePrivateKey(key)
+			if err != nil {
+				return fmt.Errorf("密钥文件解析失败: %w", err)
+			}
 		}
 		auth = append(auth, ssh.PublicKeys(signer))
 	}
