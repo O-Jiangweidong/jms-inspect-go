@@ -25,13 +25,18 @@ const (
 )
 
 type Command struct {
-	content string
-	timeout int
+	content      string
+	timeout      int
+	withFailPipe bool
 }
 
 func (c *Command) Value() string {
+	value := c.content
 	if c.timeout != 0 {
-		return fmt.Sprintf("timeout %d %s", c.timeout, c.content)
+		value = fmt.Sprintf("timeout %d %s", c.timeout, value)
+	}
+	if c.withFailPipe {
+		value = fmt.Sprintf("set -o pipefail; %s", value)
 	}
 	return c.content
 }
@@ -44,16 +49,6 @@ type GlobalInfo struct {
 	TotalCount      int
 	InspectDatetime string
 	JMSVersion      string
-}
-
-func IsValidType(machineType string) error {
-	validTypes := []string{"mysql", "jumpserver"}
-	for _, element := range validTypes {
-		if element == machineType {
-			return nil
-		}
-	}
-	return fmt.Errorf("无效的类型 %s, 目前仅支持 %s", machineType, strings.Join(validTypes, ", "))
 }
 
 type ResultSummary struct {
@@ -426,7 +421,7 @@ func (o *Options) CheckMachine() error {
 		valid := "x"
 		m.Type = strings.ToLower(m.Type)
 
-		if err = IsValidType(m.Type); err != nil {
+		if err = m.IsValid(); err != nil {
 			return err
 		}
 		if m.Password == "" && m.SSHKeyPath == "" {
@@ -437,7 +432,7 @@ func (o *Options) CheckMachine() error {
 			)
 			m.Password = o.getPasswordFromUser(title)
 		}
-		if m.PriType != "" && m.PriPwd == "" {
+		if m.PriType == "su -" && m.PriPwd == "" {
 			title := fmt.Sprintf("请输入主机为 %s(%s)，root 的密码：", m.Name, m.Host)
 			m.PriPwd = o.getPasswordFromUser(title)
 		}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -26,6 +27,56 @@ type Machine struct {
 	Valid            bool   `yaml:"-" json:"valid"`
 
 	Client *ssh.Client `yaml:"-" json:"-"`
+}
+
+func (m *Machine) isValidType(machineType string) error {
+	validTypes := map[string]struct{}{
+		"mysql":      {},
+		"jumpserver": {},
+	}
+
+	if _, exists := validTypes[machineType]; !exists {
+		validNames := make([]string, 0, len(validTypes))
+		for t := range validTypes {
+			validNames = append(validNames, t)
+		}
+		sort.Strings(validNames)
+		return fmt.Errorf("无效的类型 %s, 目前仅支持 %s", machineType, strings.Join(validNames, ", "))
+	}
+	return nil
+}
+
+func (m *Machine) isValidPriType(priType string) error {
+	if priType == "" {
+		return nil
+	}
+
+	validTypes := map[string]struct{}{
+		"su -": {},
+		"sudo": {},
+	}
+
+	if _, exists := validTypes[priType]; !exists {
+		validNames := make([]string, 0, len(validTypes))
+		for t := range validTypes {
+			validNames = append(validNames, t)
+		}
+		sort.Strings(validNames)
+		return fmt.Errorf("无效的类型 %s, 目前仅支持 %s", priType, strings.Join(validNames, ", "))
+	}
+	return nil
+}
+
+func (m *Machine) IsValid() (err error) {
+	err = m.isValidType(m.Type)
+	if err != nil {
+		return err
+	}
+	err = m.isValidPriType(m.PriType)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *Machine) Connect() error {
@@ -79,33 +130,44 @@ func (m *Machine) DoCommand(command Command) (string, error) {
 		_ = session.Close()
 	}(session)
 
-	var rest []byte
-	if strings.HasPrefix(m.PriType, "su") {
+	executePrivilegedCommand := func(cmd string, password string) ([]byte, error) {
 		var stdoutBuf bytes.Buffer
 		session.Stdout = &stdoutBuf
 		stdin, err := session.StdinPipe()
 		if err != nil {
-			return "", err
+			return nil, fmt.Errorf("获取标准输入失败: %w", err)
 		}
-		cmd := strings.ReplaceAll(command.Value(), "'", "'\\''")
-		if err = session.Start(fmt.Sprintf("%s -c '%s'", m.PriType, cmd)); err != nil {
-			return "", err
+
+		if err = session.Start(cmd); err != nil {
+			return nil, fmt.Errorf("启动命令失败: %w", err)
 		}
 
 		go func() {
-			_, _ = stdin.Write([]byte(m.PriPwd + "\n"))
+			time.Sleep(100 * time.Millisecond)
+			_, _ = stdin.Write([]byte(password + "\n"))
 			_ = stdin.Close()
 		}()
 
 		if err = session.Wait(); err != nil {
-			return "", err
+			return nil, fmt.Errorf("命令执行失败: %w", err)
 		}
-		rest = stdoutBuf.Bytes()
-	} else {
+		return stdoutBuf.Bytes(), nil
+	}
+
+	var rest []byte
+	switch m.PriType {
+	case "su -":
+		escapedCmd := strings.ReplaceAll(command.Value(), "'", "'\\''")
+		fullCmd := fmt.Sprintf("%s -c '%s'", m.PriType, escapedCmd)
+		rest, err = executePrivilegedCommand(fullCmd, m.PriPwd)
+	case "sudo":
+		fullCmd := fmt.Sprintf("sudo -S %s", command.Value())
+		rest, err = executePrivilegedCommand(fullCmd, m.Password)
+	default:
 		rest, err = session.CombinedOutput(command.Value())
-		if err != nil {
-			return "", err
-		}
+	}
+	if err != nil {
+		return "", err
 	}
 	return strings.TrimSpace(string(rest)), nil
 }

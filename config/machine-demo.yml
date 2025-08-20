@@ -15,5 +15,5 @@ servers:
     port: 22
     username: proc
     password: ""
-    privilege_type: "su -"
+    privilege_type: "su -" # 支持 su - / sudo
     privilege_password: ""

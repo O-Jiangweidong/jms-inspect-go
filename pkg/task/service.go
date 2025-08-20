@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const ComputeSpaceCommand = "[ -d %s ] && du %s -sh|awk '{print $1}' || echo '%s'"
+const ComputeSpaceCommand = "du %s -sh|awk '{print $1}'"
 
 type Component struct {
 	ServiceName    string
@@ -29,27 +29,26 @@ func (t *ServiceTask) GetReplayPathInfo() {
 	t.result["ReplayPath"] = replayPath
 	// 总大小
 	cmd := fmt.Sprintf(
-		"[ -d %s ] && df -h %s --output=size| awk '{if (NR > 1) {print $1}}' || echo '0'",
-		replayPath, replayPath,
+		"df -h %s --output=size| awk '{if (NR > 1) {print $1}}' || echo '0'", replayPath,
 	)
 	command := Command{content: cmd, timeout: 5}
-	if result, err := t.Machine.DoCommand(command); err == nil && result != common.EmptyFlag {
+	if result, err := t.Machine.DoCommand(command); err == nil && result != "" {
 		t.result["ReplayTotal"] = result
 	} else {
 		t.result["ReplayTotal"] = common.Empty
 	}
 	// 已经使用
-	cmd = fmt.Sprintf(ComputeSpaceCommand, replayPath, replayPath, common.EmptyFlag)
+	cmd = fmt.Sprintf(ComputeSpaceCommand, replayPath)
 	command = Command{content: cmd, timeout: 5}
-	if result, err := t.Machine.DoCommand(command); err == nil && result != common.EmptyFlag {
+	if result, err := t.Machine.DoCommand(command); err == nil && result != "" {
 		t.result["ReplayUsed"] = result
 	} else {
 		t.result["ReplayUsed"] = common.Empty
 	}
 	// 未使用
 	cmd = fmt.Sprintf(
-		"[ -d %s ] && df %s --output=avail| awk '{if (NR > 1) {print $1}}' || echo '%s'",
-		replayPath, replayPath, common.EmptyFlag,
+		"df %s --output=avail| awk '{if (NR > 1) {print $1}}' || echo '%s'",
+		replayPath, common.EmptyFlag,
 	)
 	command = Command{content: cmd, timeout: 5}
 	if result, err := t.Machine.DoCommand(command); err == nil && result != common.EmptyFlag {
@@ -86,10 +85,10 @@ func (t *ServiceTask) GetComponentLogSize() {
 			logPath = filepath.Join(volumeDir, subPath, "data", "logs")
 		}
 		logSize := common.Empty
-		cmd := fmt.Sprintf(ComputeSpaceCommand, logPath, logPath, common.EmptyFlag)
-		command := Command{content: cmd, timeout: 5}
+		cmd := fmt.Sprintf(ComputeSpaceCommand, logPath)
+		command := Command{content: cmd, timeout: 5, withFailPipe: true}
 		if result, err := t.Machine.DoCommand(command); err == nil {
-			if result != common.EmptyFlag {
+			if result != "" {
 				needRecord = true
 			}
 			logSize = result

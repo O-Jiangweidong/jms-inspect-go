@@ -303,7 +303,7 @@ func (t *OsInfoTask) GetPortTidyDisplay(result string) string {
 }
 
 func (t *OsInfoTask) GetExposePort() {
-	ssCmd := `ss -tuln | grep LISTEN | awk '{print $5}' | awk -F: '{print $2$4}' | sort |uniq |tr '\n' ',' | sed 's/,$//'`
+	ssCmd := `netstat -tuln | grep LISTEN | awk '{print $4}' | awk -F: '{print $NF}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 	command := Command{content: ssCmd, timeout: 5}
 	if result, err := t.Machine.DoCommand(command); err == nil {
 		ports := t.GetPortTidyDisplay(result)
