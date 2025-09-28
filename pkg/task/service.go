@@ -88,7 +88,7 @@ func (t *ServiceTask) GetComponentLogSize() {
 		cmd := fmt.Sprintf(ComputeSpaceCommand, logPath)
 		command := Command{content: cmd, timeout: 5, withFailPipe: true}
 		if result, err := t.Machine.DoCommand(command); err == nil {
-			if result != "" {
+			if result != "" && !strings.Contains(result, "No such file") {
 				needRecord = true
 			}
 			logSize = result
