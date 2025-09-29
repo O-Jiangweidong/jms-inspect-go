@@ -61,7 +61,7 @@ func (t *SummaryTask) GetJMSSummary() {
 			if err != nil {
 				continue
 			}
-			display = append(display, fmt.Sprintf("%s类型：%s个", platform, count))
+			display = append(display, fmt.Sprintf("%s类型 %s 个", platform, count))
 		}
 	}
 	t.result["AssetCountDisplay"] = strings.Join(display, "，")
