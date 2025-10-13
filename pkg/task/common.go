@@ -76,8 +76,7 @@ func (r *ResultSummary) SetGlobalInfo(opts *Options) {
 		switch m.Type {
 		case common.JumpServer:
 			r.GlobalInfo.JMSCount += 1
-		case common.MySQL:
-		case common.PostgreSQL:
+		case common.MySQL, common.PostgreSQL:
 			r.GlobalInfo.RDSCount += 1
 		case common.Redis:
 			r.GlobalInfo.RedisCount += 1

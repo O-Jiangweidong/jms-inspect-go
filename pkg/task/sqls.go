@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"inspect/pkg/common"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -201,7 +203,44 @@ func (c *RDSBaseClient) QueryRow(query string, args ...any) *sql.Row {
 }
 
 type MySQLClient struct {
+	version string
+
 	RDSBaseClient
+}
+
+func (c *MySQLClient) GetVersion() string {
+	if c.version != "" {
+		return c.version
+	}
+	err := c.QueryRow("SELECT VERSION()").Scan(&c.version)
+	if err != nil {
+		return c.version
+	}
+	re := regexp.MustCompile(`^\d+\.\d+\.\d+`)
+	c.version = re.FindString(c.version)
+	return c.version
+}
+
+func (c *MySQLClient) GetReplicationCommand() string {
+	version := c.GetVersion()
+	parts := strings.Split(version, ".")
+	if len(parts) < 2 {
+		return "SHOW SLAVE STATUS" // 无法解析时默认使用旧命令
+	}
+
+	major, _ := strconv.Atoi(parts[0])
+	minor, _ := strconv.Atoi(parts[1])
+	patch := 0
+	if len(parts) > 2 {
+		patch, _ = strconv.Atoi(parts[2])
+	}
+
+	if (major > 8) ||
+		(major == 8 && minor > 0) ||
+		(major == 8 && minor == 0 && patch >= 22) {
+		return "SHOW REPLICA STATUS"
+	}
+	return "SHOW SLAVE STATUS"
 }
 
 func (c *MySQLClient) GetTableInfo() ([]TableInfo, error) {
@@ -239,7 +278,7 @@ func (c *MySQLClient) GetRDSInfo() ([]RDSInfo, error) {
 	// 获取slave信息
 	dbSlaveSqlRunning := common.Empty
 	dbSlaveIORunning := common.Empty
-	rows, err := c.Query("SHOW SLAVE STATUS")
+	rows, err := c.Query(c.GetReplicationCommand())
 	if err != nil {
 		return nil, err
 	}
