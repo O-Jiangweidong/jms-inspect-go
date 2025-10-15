@@ -79,9 +79,9 @@ func main() {
 		result["MachineType"] = m.Type
 		result["MachineName"] = m.Name
 		resultList = append(resultList, result)
-		for _, r := range abnormalResult {
-			r.NodeName = m.Name
-			resultSummary.AbnormalResults = append(resultSummary.AbnormalResults, r)
+		for _, msg := range abnormalResult {
+			msg.NodeName = m.Name
+			resultSummary.SetAbnormalResult(msg)
 		}
 	}
 	resultSummary.NormalResults = resultList

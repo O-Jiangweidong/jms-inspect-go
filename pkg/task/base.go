@@ -260,6 +260,7 @@ func (t *Task) GetConfig(key, defaultV string) string {
 func (t *Task) SetAbnormalEvent(desc, level string) {
 	displayMap := make(map[string]string)
 	displayMap[common.Critical] = "严重"
+	displayMap[common.Alert] = "警告"
 	displayMap[common.Normal] = "一般"
 	displayMap[common.Slight] = "轻微"
 

@@ -140,8 +140,26 @@
             margin: 0 auto;
         }
 
-        .warning {
-            color: red;
+        .critical {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .alert {
+            color: #ea580c;
+        }
+
+        .normal {
+            color: #ca8a04;
+        }
+
+        .slight {
+            color: #64748b;
+            font-size: 0.95em;
+        }
+
+        .critical, .alert, .normal, .slight {
+            padding: 0.3em 0;
         }
     </style>
 </head>
@@ -199,7 +217,7 @@
                     </tr>
                     {{ if .AbnormalResults }}
                     {{ range .AbnormalResults }}
-                    <tr class="{{ if eq .Level "critical" }}warning{{ end }}">
+                    <tr class="{{ .Level }}">
                         <td>{{ .LevelDisplay}}</td>
                         <td>{{ .NodeName }}</td>
                         <td>{{ .Desc }}</td>

@@ -3,6 +3,7 @@ package task
 import (
 	"fmt"
 	"inspect/pkg/common"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -211,6 +212,20 @@ type DiskInfo struct {
 	FileMount     string
 }
 
+func (t *OsInfoTask) isFileUsageRateAlert(fileUsageRate string, standard float64) bool {
+	re := regexp.MustCompile(`(\d+(\.\d+)?)%`)
+	match := re.FindStringSubmatch(fileUsageRate)
+	result := ""
+	if len(match) >= 2 {
+		result = match[1]
+	}
+	value, err := strconv.ParseFloat(result, 64)
+	if err != nil {
+		return false
+	}
+	return value > standard
+}
+
 func (t *OsInfoTask) GetDiskInfo() {
 	logicalCmd := `df -hT -x tmpfs -x overlay -x devtmpfs| awk '{if (NR > 1 && $1!=tmpfs) {print $1,$2,$3,$4,$5,$6,$7}}'`
 	command := Command{content: logicalCmd, timeout: 5}
@@ -221,14 +236,20 @@ func (t *OsInfoTask) GetDiskInfo() {
 				continue
 			}
 			diskInfo := strings.Split(disk, " ")
+			fileUsageRate := strings.TrimSpace(diskInfo[5])
+			fileMount := strings.TrimSpace(diskInfo[6])
+			standard := 10.0
+			if t.isFileUsageRateAlert(fileUsageRate, standard) {
+				t.SetAbnormalEvent(fmt.Sprintf("%s 磁盘空间不足 %d%%", fileMount, int(100-standard)), common.Alert)
+			}
 			diskInfoList = append(diskInfoList, DiskInfo{
 				FileSystem:    strings.TrimSpace(diskInfo[0]),
 				FileType:      strings.TrimSpace(diskInfo[1]),
 				FileSize:      strings.TrimSpace(diskInfo[2]),
 				FileUsed:      strings.TrimSpace(diskInfo[3]),
 				FileAvailable: strings.TrimSpace(diskInfo[4]),
-				FileUsageRate: strings.TrimSpace(diskInfo[5]),
-				FileMount:     strings.TrimSpace(diskInfo[6]),
+				FileUsageRate: fileUsageRate,
+				FileMount:     fileMount,
 			})
 		}
 		t.result["DiskInfoList"] = diskInfoList

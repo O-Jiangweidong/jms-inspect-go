@@ -302,15 +302,15 @@ func (c *MySQLClient) GetRDSInfo() ([]RDSInfo, error) {
 				value = string(v)
 			}
 			switch name {
-			case "Slave_SQL_Running":
+			case "Slave_SQL_Running", "Replica_SQL_Running":
 				dbSlaveSqlRunning = fmt.Sprintf("%v", value)
-			case "Slave_IO_Running":
+			case "Slave_IO_Running", "Replica_IO_Running":
 				dbSlaveIORunning = fmt.Sprintf("%v", value)
 			}
 		}
 	}
-	rdsInfos = append(rdsInfos, RDSInfo{Name: "Slave IO Running", Value: dbSlaveIORunning})
-	rdsInfos = append(rdsInfos, RDSInfo{Name: "Slave SQL Running", Value: dbSlaveSqlRunning})
+	rdsInfos = append(rdsInfos, RDSInfo{Name: "IO 线程运行状态", Value: dbSlaveIORunning})
+	rdsInfos = append(rdsInfos, RDSInfo{Name: "SQL 线程运行状态", Value: dbSlaveSqlRunning})
 	// 获取表数量
 	var tableCount string
 	query := "SELECT COUNT(*) FROM information_schema.tables WHERE table_type='BASE TABLE'"

@@ -24,6 +24,13 @@ const (
 	YML = 1
 )
 
+var levelPriority = map[string]int{
+	common.Critical: 3,
+	common.Alert:    2,
+	common.Normal:   1,
+	common.Slight:   0,
+}
+
 type Command struct {
 	content      string
 	timeout      int
@@ -54,13 +61,30 @@ type GlobalInfo struct {
 type ResultSummary struct {
 	GlobalInfo GlobalInfo
 
-	NormalResults   []map[string]interface{}
 	AbnormalResults []AbnormalMsg
+	NormalResults   []map[string]interface{}
 	VirtualResult   map[string]interface{}
 	DBResult        map[string]interface{}
 
 	// Other
 	EchartsData string `json:"-"`
+}
+
+func (r *ResultSummary) SetAbnormalResult(msg AbnormalMsg) {
+	msgPriority := levelPriority[msg.Level]
+	insertIdx := 0
+	for i, existing := range r.AbnormalResults {
+		existingPriority := levelPriority[existing.Level]
+		if existingPriority < msgPriority {
+			insertIdx = i
+			break
+		}
+		insertIdx = i + 1
+	}
+	r.AbnormalResults = append(
+		r.AbnormalResults[:insertIdx],
+		append([]AbnormalMsg{msg}, r.AbnormalResults[insertIdx:]...)...,
+	)
 }
 
 func (r *ResultSummary) SetGlobalInfo(opts *Options) {

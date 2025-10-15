@@ -5,6 +5,7 @@ const (
 	No         = "否"
 	Empty      = "未获取到"
 	Critical   = "critical"
+	Alert      = "alert"
 	Normal     = "normal"
 	Slight     = "slight"
 	JumpServer = "jumpserver"
