@@ -227,27 +227,27 @@ func (t *OsInfoTask) isFileUsageRateAlert(fileUsageRate string, standard float64
 }
 
 func (t *OsInfoTask) GetDiskInfo() {
-	logicalCmd := `df -hT -x tmpfs -x overlay -x devtmpfs| awk '{if (NR > 1 && $1!=tmpfs) {print $1,$2,$3,$4,$5,$6,$7}}'`
+	logicalCmd := `df -hT -x tmpfs -x overlay -x devtmpfs| awk '{if (NR > 1) {print $1,$2,$3,$4,$5,$6,$7}}'`
 	command := Command{content: logicalCmd, timeout: 5}
 	var diskInfoList []DiskInfo
 	if result, err := t.Machine.DoCommand(command); err == nil {
 		for _, disk := range strings.Split(result, "\n") {
-			if disk == "" {
+			diskInfo := strings.Fields(disk)
+			if len(diskInfo) < 7 {
 				continue
 			}
-			diskInfo := strings.Split(disk, " ")
-			fileUsageRate := strings.TrimSpace(diskInfo[5])
-			fileMount := strings.TrimSpace(diskInfo[6])
-			standard := 10.0
+			fileUsageRate := t.GetValueWithIndex(diskInfo, 5)
+			fileMount := t.GetValueWithIndex(diskInfo, 6)
+			standard := 90.0
 			if t.isFileUsageRateAlert(fileUsageRate, standard) {
 				t.SetAbnormalEvent(fmt.Sprintf("%s 磁盘空间不足 %d%%", fileMount, int(100-standard)), common.Alert)
 			}
 			diskInfoList = append(diskInfoList, DiskInfo{
-				FileSystem:    strings.TrimSpace(diskInfo[0]),
-				FileType:      strings.TrimSpace(diskInfo[1]),
-				FileSize:      strings.TrimSpace(diskInfo[2]),
-				FileUsed:      strings.TrimSpace(diskInfo[3]),
-				FileAvailable: strings.TrimSpace(diskInfo[4]),
+				FileSystem:    t.GetValueWithIndex(diskInfo, 0),
+				FileType:      t.GetValueWithIndex(diskInfo, 1),
+				FileSize:      t.GetValueWithIndex(diskInfo, 2),
+				FileUsed:      t.GetValueWithIndex(diskInfo, 3),
+				FileAvailable: t.GetValueWithIndex(diskInfo, 4),
 				FileUsageRate: fileUsageRate,
 				FileMount:     fileMount,
 			})

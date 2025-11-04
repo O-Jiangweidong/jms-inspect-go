@@ -216,6 +216,13 @@ type Task struct {
 	JMSConfig map[string]string
 }
 
+func (t *Task) GetValueWithIndex(item []string, index int) string {
+	if index >= len(item) {
+		return common.Empty
+	}
+	return strings.TrimSpace(item[index])
+}
+
 type Executor struct {
 	Machine *Machine
 	Tasks   []AbstractTask
